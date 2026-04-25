@@ -1,0 +1,15 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'  # Chaque lundi à 8h UTC
+  workflow_dispatch:      # Déclenchement manuel possible
+
+jobs:
+  ping:
+    name: Ping health endpoint
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping
+        run: curl -f --retry 3 https://ajaccio-estimation.fr/api/health

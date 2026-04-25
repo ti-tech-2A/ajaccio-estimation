@@ -1,0 +1,12 @@
+{
+  "propertyType": "appartement",
+  "postalCode": "20000",
+  "surface": 80,
+  "rooms": 3,
+  "condition": "bon",
+  "features": [],
+  "fullName": "Test AI",
+  "email": "test@example.com",
+  "phone": "0612345678",
+  "gdprConsent": true
+}

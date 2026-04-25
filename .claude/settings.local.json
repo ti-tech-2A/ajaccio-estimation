@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "WebSearch",
+      "WebFetch(domain:supabase.com)",
+      "WebFetch(domain:docs.supabase.com)",
+      "Bash(npm run *)",
+      "Bash(curl -s https://ajaccio-estimation.fr/api/health)",
+      "Bash(curl -v https://ajaccio-estimation.fr/api/health)"
+    ]
+  }
+}
