@@ -138,7 +138,7 @@ function CadastralLayer({
 
 function MapLegend() {
   return (
-    <div className="pointer-events-none absolute bottom-4 left-4 z-[800] w-[min(230px,calc(100%-2rem))] rounded-2xl border border-white/12 bg-[#08162A]/82 p-3 shadow-[0_22px_55px_-28px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+    <div className="pointer-events-none absolute bottom-12 left-4 z-[800] w-[min(230px,calc(100%-2rem))] rounded-2xl border border-white/12 bg-[#08162A]/82 p-3 shadow-[0_22px_55px_-28px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:bottom-4">
       <div className="mb-2 flex items-center justify-between gap-3">
         <span className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-white/48">
           Zones DVF
