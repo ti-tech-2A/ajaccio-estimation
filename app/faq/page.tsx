@@ -58,7 +58,7 @@ const faqSchema = {
       name: 'Quelle différence avec MeilleursAgents ou SeLoger ?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: "Ces plateformes utilisent des modèles nationaux calibrés sur de grands volumes. Elles ne distinguent pas Mezzavia d'Alata, ni la route des Sanguinaires d'un immeuble standard du 20090. Notre outil est calibré exclusivement sur les 3 codes postaux d'Ajaccio.",
+        text: "Ces plateformes utilisent des modèles nationaux calibrés sur de grands volumes. Elles ne distinguent pas Mezzavia de Pietralba, ni la route des Sanguinaires d'un immeuble standard du 20090. Notre outil est calibré exclusivement sur les 3 codes postaux d'Ajaccio.",
       },
     },
     {

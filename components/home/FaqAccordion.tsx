@@ -20,7 +20,7 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     q: "Quelle différence avec MeilleursAgents ou SeLoger ?",
-    a: "Ces plateformes utilisent des modèles nationaux calibrés sur de grands volumes. Elles ne distinguent pas Mezzavia d'Alata, ni la route des Sanguinaires d'un immeuble standard. Notre outil est calibré exclusivement sur les 3 codes postaux d'Ajaccio, avec les données DVF locales.",
+    a: "Ces plateformes utilisent des modèles nationaux calibrés sur de grands volumes. Elles ne distinguent pas Mezzavia de Pietralba, ni la route des Sanguinaires d'un immeuble standard. Notre outil est calibré exclusivement sur les 3 codes postaux d'Ajaccio, avec les données DVF locales.",
   },
   {
     q: "Quelle est la précision de l'estimation automatique ?",
