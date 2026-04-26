@@ -30,7 +30,7 @@ export default function CtaFinal() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const params = address.trim() ? `?adresse=${encodeURIComponent(address.trim())}` : ''
-    router.push(`/expert${params}#contact-form`)
+    router.push(`/estimer${params}`)
   }
 
   return (
@@ -49,7 +49,7 @@ export default function CtaFinal() {
         >
           Bénéficiez gratuitement des conseils
           <br className="hidden sm:block" />
-          {' '}d'un mandataire immobilier local
+          {' '}d&apos;un mandataire immobilier local
         </motion.h2>
 
         <motion.div

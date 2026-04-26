@@ -107,7 +107,7 @@ export default function HowItWorks() {
             un rendu premium
           </h2>
           <p className="mt-5 text-sm leading-relaxed text-white/66">
-            Chaque étape réduit l'incertitude et augmente la précision, jusqu'à une fourchette
+            Chaque étape réduit l&apos;incertitude et augmente la précision, jusqu&apos;à une fourchette
             actionnable pour votre projet immobilier à Ajaccio.
           </p>
         </motion.div>

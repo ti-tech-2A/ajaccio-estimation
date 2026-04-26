@@ -1,15 +1,14 @@
 'use client'
 
-import { type FormEvent, useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
+import { Building2, Home, Map } from 'lucide-react'
 import { motion, useReducedMotion } from 'framer-motion'
 
 export default function Hero() {
   const router = useRouter()
   const reduceMotion = useReducedMotion()
-  const [address, setAddress] = useState('')
 
   const video1Ref = useRef<HTMLVideoElement>(null)
   const video2Ref = useRef<HTMLVideoElement>(null)
@@ -47,12 +46,6 @@ export default function Hero() {
     }
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const trimmedAddress = address.trim()
-    const query = trimmedAddress.length > 0 ? `?adresse=${encodeURIComponent(trimmedAddress)}` : ''
-    router.push(`/estimer${query}`)
-  }
 
   return (
     <>
@@ -96,37 +89,38 @@ export default function Hero() {
 
           {/* Sous-titre */}
           <p className="mt-3 max-w-xl text-[0.88rem] leading-relaxed text-[#5C5C5C]">
-            Saisissez votre adresse pour obtenir votre estimation gratuite
+            Sélectionnez votre type de bien pour obtenir votre estimation gratuite
             instantanément basée sur les données actuelles du marché. Bénéficiez
             des conseils avisés d&apos;un professionnel de l&apos;immobilier pour guider vos
             décisions en matière de bien.
           </p>
 
           {/* Card formulaire */}
-          <form
-            onSubmit={handleSubmit}
+          <div
             className="mt-5 max-w-lg rounded-2xl border border-[#1B4F72]/12 bg-white p-6 shadow-[0_24px_48px_-28px_rgba(27,79,114,0.22)]"
           >
-            <label htmlFor="hero-address" className="mb-2 block text-sm font-semibold text-[#1B4F72]">
-              Adresse du bien
-            </label>
-            <input
-              id="hero-address"
-              name="hero-address"
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Ex : 1 Cours Napoléon, 20000 Ajaccio"
-              className="h-13 w-full rounded-xl border border-[#1B4F72]/20 bg-white px-4 py-3 text-base text-[#1B4F72] outline-none transition-colors placeholder:text-[#9B9B9B] focus:border-[#2E86AB] focus:ring-2 focus:ring-[#2E86AB]/20"
-            />
-            <button
-              type="submit"
-              className="mt-4 flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-3 rounded-[8px] bg-[#2E86AB] px-6 text-base font-semibold text-white transition-colors duration-200 hover:bg-[#1B4F72]"
-            >
-              Estimer mon bien
-              <ArrowRight size={20} aria-hidden="true" />
-            </button>
-          </form>
+            <h2 className="mb-4 text-sm font-semibold text-[#1B4F72]">
+              Quel type de bien souhaitez-vous estimer ?
+            </h2>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: 'appartement', label: 'Appartement', Icon: Building2 },
+                { value: 'villa', label: 'Villa', Icon: Home },
+                { value: 'terrain', label: 'Terrain', Icon: Map },
+              ].map(({ value, label, Icon }) => (
+                <button
+                  key={value}
+                  onClick={() => router.push(`/estimer?type=${value}`)}
+                  className="group flex flex-col items-center justify-center gap-2 rounded-xl border border-[#1B4F72]/10 bg-white py-4 transition-all hover:border-[#2E86AB] hover:bg-[#D6EEF5] hover:shadow-sm"
+                >
+                  <Icon size={28} className="text-[#9B9B9B] transition-colors group-hover:text-[#2E86AB]" />
+                  <span className="text-xs font-semibold text-[#5C5C5C] md:text-sm group-hover:text-[#1B4F72]">
+                    {label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
         </motion.div>
 
         {/* ── RIGHT COLUMN — Image ── */}

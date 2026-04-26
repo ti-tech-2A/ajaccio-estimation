@@ -13,7 +13,7 @@ export const PRECISION_THRESHOLDS = {
 } as const
 
 export const ESTIMATION_OUTLIER_TRIM = 0.25  // Suppression des 25% extrêmes
-export const ESTIMATION_MARGIN = 0.10        // Fourchette ±10%
+export const ESTIMATION_MARGIN = 0.05        // Fourchette ±5% au lieu de 10%
 export const COEFFICIENT_CAP = 0.40         // Plafond cumulatif ±40%
 
 export const RATE_LIMIT = {

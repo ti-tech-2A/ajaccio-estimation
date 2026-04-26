@@ -28,7 +28,8 @@ const PROBLEMS: ProblemItem[] = [
 const SOLUTION_POINTS = [
   'Filtrage par code postal et code INSEE de la commune',
   'Lecture terrain locale pour valider les cas atypiques',
-  'Synchronisation sur les cycles officiels DVF',
+  'Synchronisation régulière des données',
+  'Filtrage par micro-marché d\u0027Ajaccio',
 ]
 
 export default function ProblemSection() {
@@ -60,7 +61,7 @@ export default function ProblemSection() {
           </h2>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-[#4A5568]">
             Entre la route des Sanguinaires, le centre et les zones sud, les amplitudes de prix
-            sont fortes. Une valuation premium doit donc raisonner à l'échelle micro-locale.
+            sont fortes. Une valuation premium doit donc raisonner à l&apos;échelle micro-locale.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-medium text-[#0F2A4A]/75">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 shadow-sm">

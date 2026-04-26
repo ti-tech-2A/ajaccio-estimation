@@ -38,3 +38,41 @@ tmp-*.png
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
+.env*.local
+
+# agent skills
+.agents/
+.claude/
+.codebuddy/
+.commandcode/
+.continue/
+.crush/
+.factory/
+.goose/
+.junie/
+.kilocode/
+.kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
+.trae/
+.windsurf/
+.zencoder/
+skills/
+skills-lock.json
+
+# temp debug
+*.mjs
+build.log
+build_out.txt
+test-out.json
+scripts/

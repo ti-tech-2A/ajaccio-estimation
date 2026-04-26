@@ -19,7 +19,7 @@ export async function persistLeadFromEstimate({
   result: EstimationResult
   source: string
 }) {
-  const payload = {
+  const estimationPayload = {
     full_name: formData.fullName,
     email: formData.email,
     phone: formData.phone,
@@ -44,39 +44,56 @@ export async function persistLeadFromEstimate({
     query_level: result.queryLevel,
     precision_level: result.precisionLevel,
     source,
-    status: 'new',
     gdpr_consent: formData.gdprConsent,
     gdpr_consent_date: new Date().toISOString(),
   }
 
-  const leadInsert = await insertRecord('leads', payload)
-  const estimationInsert = await insertRecord('estimations', payload)
+  const leadPayload = {
+    full_name: formData.fullName,
+    email: formData.email,
+    phone: formData.phone,
+    property_type: formData.propertyType,
+    zip_code: formData.postalCode,
+    city: 'Ajaccio',
+    address: formData.address,
+    surface: formData.surface,
+    rooms: formData.rooms,
+    land_surface: formData.landSurface,
+    date_construction: formData.yearBuilt?.toString() || null,
+    etat_bien: formData.condition,
+    features: formData.features,
+    project_intent: 'estimation',
+    status: 'new'
+  }
+
+  const leadInsert = await insertRecord('leads', leadPayload)
+  // estimations table has been removed, don't insert here
   const webhook = await sendN8nWebhook('lead_captured', {
     source,
     lead: {
-      full_name: payload.full_name,
-      email: payload.email,
-      phone: payload.phone,
-      postal_code: payload.postal_code,
-      property_type: payload.property_type,
+      full_name: leadPayload.full_name,
+      email: leadPayload.email,
+      phone: leadPayload.phone,
+      postal_code: leadPayload.zip_code,
+      property_type: leadPayload.property_type,
     },
     estimation: {
-      estimated_price_low: payload.estimated_price_low,
-      estimated_price_high: payload.estimated_price_high,
-      estimated_price_sqm: payload.estimated_price_sqm,
-      comparable_count: payload.comparable_count,
-      query_level: payload.query_level,
-      precision_level: payload.precision_level,
+      estimated_price_low: estimationPayload.estimated_price_low,
+      estimated_price_high: estimationPayload.estimated_price_high,
+      estimated_price_sqm: estimationPayload.estimated_price_sqm,
+      comparable_count: estimationPayload.comparable_count,
+      query_level: estimationPayload.query_level,
+      precision_level: estimationPayload.precision_level,
     },
     persistence: {
       leads: leadInsert.persisted,
-      estimations: estimationInsert.persisted,
+      estimations: false, // Legacy field for the webhook
     },
   })
 
   return {
     leadInsert,
-    estimationInsert,
+    estimationInsert: { persisted: false, reason: 'table_removed' as const },
     webhook,
   }
 }
@@ -106,7 +123,10 @@ export async function persistContactRequest({
     status: 'new',
   }
 
-  const contactInsert = await insertRecord('contact_requests', payload)
+  const contactInsert = await insertRecord('leads', {
+    ...payload,
+    project_intent: 'contact'
+  })
   const webhook = await sendN8nWebhook('contact_request_submitted', {
     contact: {
       full_name: payload.full_name,

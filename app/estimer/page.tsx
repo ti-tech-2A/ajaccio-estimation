@@ -25,11 +25,18 @@ interface StepErrors {
 function WizardContent() {
   const searchParams = useSearchParams()
 
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(() => {
+    const type = searchParams.get('type')
+    if (type === 'appartement' || type === 'villa' || type === 'terrain') {
+      return 2
+    }
+    return 1
+  })
   const [formData, setFormData] = useState<Partial<WizardFormData>>(() => {
     // Pre-fill from URL params
     const type = searchParams.get('type')
     const cp = searchParams.get('cp')
+    const adresse = searchParams.get('adresse')
     const initial: Partial<WizardFormData> = {}
     if (type === 'appartement' || type === 'villa' || type === 'terrain') {
       initial.propertyType = type
@@ -38,7 +45,7 @@ function WizardContent() {
       initial.postalCode = cp
     }
     initial.features = []
-    initial.address = ''
+    initial.address = adresse ?? ''
     initial.commune = ''
     initial.surface = 10
     initial.rooms = 1

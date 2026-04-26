@@ -85,7 +85,7 @@ function computeMedian(rows: DVFRow[]): DVFQueryResult {
 function withPostalFilter(query: any, postalCode: string): any {
   query = query.eq('code_postal', postalCode)
   if (postalCode === '20167') {
-    query = query.eq('commune', 'Ajaccio').eq('code_insee', '2A004')
+    query = query.eq('nom_commune', 'Ajaccio').eq('code_commune', '2A004')
   }
   return query
 }
@@ -103,7 +103,7 @@ export async function queryLevel1(
   const dvfType = DVF_TYPE_MAP[propertyType]
 
   let q = supabase
-    .from('dvf_transactions')
+    .from('dvf_sales')
     .select('valeur_fonciere, surface_reelle_bati')
     .eq('type_local', dvfType)
     .gte('date_mutation', dateCutoff(24))
@@ -143,7 +143,7 @@ export async function queryLevel2(
   const dvfType = DVF_TYPE_MAP[propertyType]
 
   let q = supabase
-    .from('dvf_transactions')
+    .from('dvf_sales')
     .select('valeur_fonciere, surface_reelle_bati')
     .eq('type_local', dvfType)
     .gte('date_mutation', dateCutoff(36))
@@ -173,7 +173,7 @@ export async function queryLevel3(
 
   const perCpQueries = ALL_AJACCIO_CPS.map(async (cp) => {
     let q = supabase
-      .from('dvf_transactions')
+      .from('dvf_sales')
       .select('valeur_fonciere, surface_reelle_bati')
       .eq('type_local', dvfType)
       .gte('date_mutation', cutoff)
