@@ -213,7 +213,7 @@ Les CPs 20000 et 20090 n'ont pas cette ambiguïté — filtre CP seul suffisant.
 - Aspretto / Campo dell'Oro
 - Bodiccione
 - Octroi
-- Madonuccia
+- Les Cannes - Les Salines
 - Binda
 - Saint-Joseph
 - Candia
@@ -365,7 +365,7 @@ export const DVF_NEXT_UPDATE_LABEL = 'novembre 2026'
          appartement et Y € pour une villa, selon les données DVF actualisées au [date]."
 
 20090 : "À Ajaccio (20090), secteur englobant Aspretto et Campo dell'Oro, Bodiccione,
-         l'Octroi, la Madonuccia, Binda, Saint-Joseph, Candia, Saint-Jean et La Pietrina
+         l'Octroi, Les Cannes - Les Salines, Binda, Saint-Joseph, Candia, Saint-Jean et La Pietrina
          / les Jardins de l'Empereur, le prix médian au m² est de X € pour un
          appartement et Y € pour une villa, selon les données DVF actualisées au [date]."
 

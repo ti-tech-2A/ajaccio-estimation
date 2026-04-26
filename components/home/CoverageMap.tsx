@@ -1,127 +1,105 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import { MapContainer, TileLayer, GeoJSON, ZoomControl, useMap } from 'react-leaflet'
+import { useEffect, useState } from 'react'
+import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import type { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson'
 
-type PostalCode = '20000' | '20090' | '20167'
+interface SectionLayerProps {
+  data: FeatureCollection
+}
+
+type PostalZone = 'centre' | 'sud' | 'mezzavia'
 
 interface ZoneStyle {
   name: string
-  base: string
-  hover: string
+  fill: string
+  hoverFill: string
   stroke: string
   glow: string
 }
 
-const ZONE_ORDER: PostalCode[] = ['20000', '20090', '20167']
+const ZONE_ORDER: PostalZone[] = ['centre', 'sud', 'mezzavia']
 
-const ZONE_COLORS: Record<PostalCode, ZoneStyle> = {
-  '20000': {
+const ZONE_COLORS: Record<PostalZone, ZoneStyle> = {
+  centre: {
     name: 'Centre',
-    base: '#2E86AB',
-    hover: '#7DC6E2',
+    fill: '#2E86AB',
+    hoverFill: '#7DC6E2',
     stroke: '#8CD3EE',
     glow: 'rgba(46, 134, 171, 0.42)',
   },
-  '20090': {
+  sud: {
     name: 'Sud',
-    base: '#C4813A',
-    hover: '#E4B66A',
+    fill: '#C4813A',
+    hoverFill: '#E4B66A',
     stroke: '#F0C77B',
     glow: 'rgba(196, 129, 58, 0.42)',
   },
-  '20167': {
+  mezzavia: {
     name: 'Mezzavia',
-    base: '#6B7F55',
-    hover: '#A7BC80',
+    fill: '#6B7F55',
+    hoverFill: '#A7BC80',
     stroke: '#B9CA94',
     glow: 'rgba(107, 127, 85, 0.42)',
   },
 }
 
-function cpForSection(section: string): PostalCode {
-  if (!section) return '20000'
+function sectionName(feature?: Feature<Geometry, GeoJsonProperties>) {
+  const section = String(feature?.properties?.section ?? feature?.properties?.code ?? '').trim()
+  return section ? `Section ${section}` : 'Section cadastrale'
+}
 
+function zoneForSection(section: string): PostalZone {
   const value = section.toUpperCase()
 
-  if (['AC', 'AD', 'AE', 'AF', 'AG'].includes(value)) return '20167'
-  if (value.startsWith('C') || value.startsWith('D') || value.startsWith('E')) return '20090'
+  if (['AC', 'AD', 'AE', 'AF', 'AG'].includes(value)) return 'mezzavia'
+  if (value.startsWith('C') || value.startsWith('D') || value.startsWith('E')) return 'sud'
 
-  return '20000'
+  return 'centre'
 }
 
-interface TooltipState {
-  visible: boolean
-  x: number
-  y: number
-  label: string
-  cp: PostalCode | ''
-}
-
-function CadastralLayer({
-  data,
-  onHover,
-}: {
-  data: FeatureCollection
-  onHover: (state: TooltipState) => void
-}) {
-  const map = useMap()
-  const currentTooltip = useRef<TooltipState>({ visible: false, x: 0, y: 0, label: '', cp: '' })
-
+function CadastralSections({ data }: SectionLayerProps) {
   const styleFeature = (feature?: Feature<Geometry, GeoJsonProperties>) => {
-    const section = String(feature?.properties?.section ?? feature?.properties?.code ?? '')
-    const cp = cpForSection(section)
-    const colors = ZONE_COLORS[cp]
+    const section = String(feature?.properties?.section ?? feature?.properties?.code ?? '').trim()
+    const colors = ZONE_COLORS[zoneForSection(section)]
 
     return {
-      fillColor: colors.base,
-      fillOpacity: 0.28,
+      fillColor: colors.fill,
+      fillOpacity: 0.2,
       color: colors.stroke,
-      weight: 1.35,
-      opacity: 0.72,
+      weight: 1.2,
+      opacity: 0.82,
       lineJoin: 'round' as const,
     }
   }
 
   const onEachFeature = (feature: Feature<Geometry, GeoJsonProperties>, layer: L.Layer) => {
-    const section = String(feature?.properties?.section ?? feature?.properties?.code ?? '')
-    const cp = cpForSection(section)
-    const colors = ZONE_COLORS[cp]
-    const label = section ? `Section ${section}` : 'Section cadastrale'
+    const path = layer as L.Path
+    const section = String(feature?.properties?.section ?? feature?.properties?.code ?? '').trim()
+    const zone = zoneForSection(section)
+    const colors = ZONE_COLORS[zone]
 
-    ;(layer as L.Path).on({
-      mouseover: (event: L.LeafletMouseEvent) => {
-        const path = event.target as L.Path
+    path.bindTooltip(`${sectionName(feature)} - ${colors.name}`, {
+      sticky: true,
+      direction: 'top',
+      className: 'earth-section-tooltip',
+    })
+
+    path.on({
+      mouseover: () => {
         path.setStyle({
-          fillColor: colors.hover,
-          fillOpacity: 0.5,
-          color: '#F7F2EA',
-          weight: 2.15,
-          opacity: 0.96,
+          fillColor: colors.hoverFill,
+          fillOpacity: 0.38,
+          color: '#FFFFFF',
+          weight: 2,
+          opacity: 1,
         })
         path.bringToFront()
-
-        const point = map.latLngToContainerPoint(event.latlng)
-        const next: TooltipState = { visible: true, x: point.x, y: point.y, label, cp }
-        currentTooltip.current = next
-        onHover(next)
       },
-      mousemove: (event: L.LeafletMouseEvent) => {
-        const point = map.latLngToContainerPoint(event.latlng)
-        const next: TooltipState = { ...currentTooltip.current, x: point.x, y: point.y }
-        currentTooltip.current = next
-        onHover(next)
-      },
-      mouseout: (event: L.LeafletMouseEvent) => {
-        const path = event.target as L.Path
+      mouseout: () => {
         path.setStyle(styleFeature(feature))
-
-        const next: TooltipState = { visible: false, x: 0, y: 0, label: '', cp: '' }
-        currentTooltip.current = next
-        onHover(next)
       },
     })
   }
@@ -136,34 +114,36 @@ function CadastralLayer({
   )
 }
 
-function MapLegend() {
+function MapLegend({ sectionCount }: { sectionCount: number }) {
   return (
-    <div className="pointer-events-none absolute bottom-12 left-4 z-[800] w-[min(230px,calc(100%-2rem))] rounded-2xl border border-white/12 bg-[#08162A]/82 p-3 shadow-[0_22px_55px_-28px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:bottom-4">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-white/48">
-          Zones DVF
+    <div className="pointer-events-none absolute bottom-4 left-4 z-[800] w-[min(245px,calc(100%-2rem))] rounded-2xl border border-white/16 bg-[#08162A]/82 p-3.5 shadow-[0_22px_55px_-28px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-white/50">
+          Cadastre officiel
         </span>
-        <span className="text-[0.62rem] font-medium text-[#C9A96E]">Ajaccio</span>
+        <span className="text-[0.62rem] font-medium text-[#C9A96E]">2A004</span>
       </div>
 
-      <div className="grid gap-2">
-        {ZONE_ORDER.map((cp) => {
-          const colors = ZONE_COLORS[cp]
+      <div className="mt-3 grid gap-2">
+        {ZONE_ORDER.map((zone) => {
+          const colors = ZONE_COLORS[zone]
 
           return (
-            <div key={cp} className="flex items-center gap-2.5">
+            <div key={zone} className="flex items-center gap-2.5">
               <span
-                className="h-3.5 w-3.5 rounded-[4px] border border-white/20 shadow-[0_0_14px_var(--zone-glow)]"
+                className="h-3.5 w-3.5 rounded-[4px] border border-white/24"
                 style={{
-                  background: `linear-gradient(135deg, ${colors.hover}, ${colors.base})`,
-                  '--zone-glow': colors.glow,
-                } as React.CSSProperties}
+                  background: `linear-gradient(135deg, ${colors.hoverFill}, ${colors.fill})`,
+                  boxShadow: `0 0 16px ${colors.glow}`,
+                }}
               />
-              <span className="min-w-12 text-xs font-bold text-white">{cp}</span>
-              <span className="truncate text-xs font-medium text-white/62">{colors.name}</span>
+              <span className="truncate text-xs font-semibold text-white/78">{colors.name}</span>
             </div>
           )
         })}
+        <div className="mt-1 border-t border-white/10 pt-2 text-xs font-medium text-white/58">
+          {sectionCount > 0 ? `${sectionCount} sections chargees` : 'Chargement en cours'}
+        </div>
       </div>
     </div>
   )
@@ -171,12 +151,12 @@ function MapLegend() {
 
 function LoadingSkeleton() {
   return (
-    <div className="absolute inset-0 z-[900] flex items-center justify-center rounded-[22px] bg-[#08162A]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_22%,rgba(46,134,171,0.22),transparent_34%),radial-gradient(circle_at_78%_72%,rgba(196,129,58,0.16),transparent_38%)]" />
+    <div className="absolute inset-0 z-[900] flex items-center justify-center rounded-[26px] bg-[#08162A]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_18%,rgba(46,134,171,0.26),transparent_34%),radial-gradient(circle_at_72%_78%,rgba(212,168,83,0.2),transparent_38%)]" />
       <div className="relative text-center">
-        <div className="mx-auto mb-4 h-11 w-11 rounded-full border border-[#C9A96E]/20 border-t-[#C9A96E] shadow-[0_0_28px_rgba(201,169,110,0.18)] [animation:coverage-spin_0.9s_linear_infinite]" />
-        <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#C9A96E]">
-          Chargement des sections
+        <div className="mx-auto mb-4 h-11 w-11 rounded-full border border-[#D4A853]/20 border-t-[#D4A853] shadow-[0_0_28px_rgba(212,168,83,0.18)] [animation:earth-spin_0.9s_linear_infinite]" />
+        <span className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[#D4A853]">
+          Chargement satellite
         </span>
       </div>
     </div>
@@ -184,14 +164,6 @@ function LoadingSkeleton() {
 }
 
 export default function CoverageMap() {
-  const frameRef = useRef<HTMLDivElement>(null)
-  const [tooltip, setTooltip] = useState<TooltipState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    label: '',
-    cp: '',
-  })
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null)
   const [error, setError] = useState(false)
 
@@ -214,101 +186,102 @@ export default function CoverageMap() {
   }, [])
 
   useEffect(() => {
-    const id = 'coverage-map-premium-styles'
+    const id = 'coverage-map-earth-styles'
 
     if (document.getElementById(id)) return
 
     const style = document.createElement('style')
     style.id = id
     style.textContent = `
-      @keyframes coverage-spin { to { transform: rotate(360deg); } }
-      .coverage-map-frame .leaflet-container {
+      @keyframes earth-spin { to { transform: rotate(360deg); } }
+      .coverage-earth-frame .leaflet-container {
+        width: 100%;
+        height: 100%;
+        background: #071523;
         font-family: var(--font-body);
-        background: #08162A;
       }
-      .coverage-map-frame .leaflet-tile-pane {
-        filter: saturate(0.78) contrast(1.08) brightness(0.78);
+      .coverage-earth-frame .earth-map-tilt {
+        transform: perspective(980px) rotateX(46deg) rotateZ(-5.5deg) scale(1.45) translate3d(-1%, -9%, 0);
+        transform-origin: 50% 48%;
+        will-change: transform;
       }
-      .coverage-map-frame .leaflet-overlay-pane {
-        filter: drop-shadow(0 14px 22px rgba(0,0,0,0.18));
+      .coverage-earth-frame .leaflet-control-container {
+        display: none;
       }
-      .coverage-map-frame .leaflet-interactive {
+      .coverage-earth-frame .leaflet-tile-pane {
+        filter: saturate(1.14) contrast(1.06) brightness(0.9);
+      }
+      .coverage-earth-frame .leaflet-overlay-pane {
+        filter: drop-shadow(0 16px 20px rgba(0,0,0,0.28));
+      }
+      .coverage-earth-frame .leaflet-interactive {
+        cursor: default;
         transition: fill .22s ease, fill-opacity .22s ease, stroke .18s ease, stroke-width .18s ease, opacity .18s ease;
         vector-effect: non-scaling-stroke;
       }
-      .coverage-map-frame .leaflet-control-container .leaflet-top.leaflet-right {
-        top: 14px;
-        right: 14px;
-      }
-      .coverage-map-frame .leaflet-control-zoom {
-        overflow: hidden;
-        border: 1px solid rgba(247,242,234,0.14);
+      .coverage-earth-frame .earth-section-tooltip.leaflet-tooltip {
+        border: 1px solid rgba(212,168,83,0.5);
         border-radius: 14px;
-        background: rgba(8,22,42,0.76);
-        box-shadow: 0 18px 38px -24px rgba(0,0,0,0.92);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-      }
-      .coverage-map-frame .leaflet-control-zoom a {
-        width: 38px;
-        height: 38px;
-        border: 0;
-        border-bottom: 1px solid rgba(247,242,234,0.12);
-        background: transparent;
+        background: rgba(8,22,42,0.9);
+        box-shadow: 0 0 22px rgba(212,168,83,0.32), 0 18px 48px -26px rgba(0,0,0,0.92);
         color: #F7F2EA;
-        font: 600 21px/38px var(--font-body);
-        transition: background-color .18s ease, color .18s ease;
-      }
-      .coverage-map-frame .leaflet-control-zoom a:last-child {
-        border-bottom: 0;
-      }
-      .coverage-map-frame .leaflet-control-zoom a:hover,
-      .coverage-map-frame .leaflet-control-zoom a:focus {
-        background: rgba(201,169,110,0.18);
-        color: #D4A853;
-      }
-      .coverage-map-frame .leaflet-control-attribution {
-        margin: 0 10px 10px 0;
-        border: 1px solid rgba(15,42,74,0.08);
-        border-radius: 999px;
-        background: rgba(247,242,234,0.88);
-        color: rgba(15,42,74,0.78);
-        box-shadow: 0 10px 28px -20px rgba(0,0,0,0.7);
-        font-size: 10px;
-        line-height: 1.2;
-        padding: 4px 8px;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-      }
-      .coverage-map-frame .leaflet-control-attribution a {
-        color: #1B4F72;
+        font-size: 12px;
         font-weight: 700;
-        text-decoration: none;
+        letter-spacing: 0.02em;
+        padding: 7px 10px;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      .coverage-earth-frame .earth-section-tooltip.leaflet-tooltip::before {
+        display: none;
+      }
+      @media (max-width: 640px) {
+        .coverage-earth-frame .earth-map-tilt {
+          transform: perspective(760px) rotateX(42deg) rotateZ(-5deg) scale(1.62) translate3d(-1%, -7%, 0);
+        }
       }
     `
     document.head.appendChild(style)
   }, [])
 
-  const activeColors = tooltip.cp ? ZONE_COLORS[tooltip.cp] : null
-  const shouldFlipTooltip = frameRef.current
-    ? tooltip.x > frameRef.current.clientWidth - 240
-    : false
+  const sectionCount = geoData?.features.length ?? 0
 
   return (
     <div
-      ref={frameRef}
-      className="coverage-map-frame relative h-[340px] overflow-hidden rounded-[24px] border border-[#C9A96E]/22 bg-[#08162A] p-[1px] shadow-[0_34px_80px_-46px_rgba(15,42,74,0.95)] md:h-[430px]"
+      className="coverage-earth-frame relative h-[360px] overflow-hidden rounded-[28px] border border-[#D4A853]/24 bg-[#071523] p-[1px] shadow-[0_38px_90px_-46px_rgba(15,42,74,0.98)] md:h-[500px]"
       role="region"
-      aria-label="Carte des zones cadastrales DVF couvertes a Ajaccio"
+      aria-label="Vue satellite des sections cadastrales couvertes a Ajaccio"
     >
-      <div className="absolute inset-0 rounded-[24px] bg-[linear-gradient(135deg,rgba(201,169,110,0.46),rgba(46,134,171,0.28)_42%,rgba(247,242,234,0.08))]" />
-      <div className="relative h-full overflow-hidden rounded-[22px]">
-        <div className="pointer-events-none absolute inset-0 z-[650] bg-[radial-gradient(circle_at_18%_16%,rgba(247,242,234,0.13),transparent_24%),linear-gradient(180deg,rgba(8,22,42,0.04),rgba(8,22,42,0.36))]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] h-28 bg-gradient-to-b from-[#08162A]/80 to-transparent" />
+      <div className="absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(212,168,83,0.52),rgba(46,134,171,0.24)_44%,rgba(247,242,234,0.08))]" />
 
-        <div className="pointer-events-none absolute left-4 top-4 z-[800] max-w-[calc(100%-5.5rem)] rounded-2xl border border-white/12 bg-[#08162A]/78 px-4 py-3 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.9)] backdrop-blur-xl">
-          <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.2em] text-[#C9A96E]">
-            Perimetre DVF
+      <div className="relative h-full overflow-hidden rounded-[26px]">
+        <div className="absolute inset-[-20%]">
+          <MapContainer
+            center={[41.9244, 8.7387]}
+            zoom={13}
+            className="earth-map-tilt"
+            scrollWheelZoom={false}
+            zoomControl={false}
+            attributionControl={false}
+            dragging={false}
+            doubleClickZoom={false}
+            keyboard={false}
+          >
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution="Esri, Maxar, Earthstar Geographics"
+            />
+            {geoData && <CadastralSections data={geoData} />}
+          </MapContainer>
+        </div>
+
+        <div className="pointer-events-none absolute inset-0 z-[650] bg-[radial-gradient(circle_at_28%_18%,rgba(247,242,234,0.12),transparent_25%),linear-gradient(180deg,rgba(7,21,35,0.06),rgba(7,21,35,0.32)_72%,rgba(7,21,35,0.58))]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] h-32 bg-gradient-to-b from-[#071523]/72 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[700] h-32 bg-gradient-to-t from-[#071523]/72 to-transparent" />
+
+        <div className="pointer-events-none absolute left-4 top-4 z-[800] max-w-[calc(100%-2rem)] rounded-2xl border border-white/14 bg-[#08162A]/78 px-4 py-3 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.92)] backdrop-blur-xl">
+          <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.2em] text-[#D4A853]">
+            Vue satellite 3D
           </span>
           <span className="mt-1 block text-sm font-semibold leading-none text-white">
             Sections cadastrales Ajaccio
@@ -317,52 +290,18 @@ export default function CoverageMap() {
 
         {!geoData && !error && <LoadingSkeleton />}
         {error && (
-          <div className="absolute inset-0 z-[900] flex items-center justify-center rounded-[22px] bg-[#08162A]">
+          <div className="absolute inset-0 z-[900] flex items-center justify-center rounded-[26px] bg-[#071523]">
             <span className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-medium text-white/62">
               Carte non disponible
             </span>
           </div>
         )}
 
-        <MapContainer
-          center={[41.9267, 8.737]}
-          zoom={13}
-          className="h-full w-full"
-          scrollWheelZoom={false}
-          zoomControl={false}
-          attributionControl
-        >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-          />
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png"
-            attribution=""
-          />
-          <ZoomControl position="topright" />
-          {geoData && <CadastralLayer data={geoData} onHover={setTooltip} />}
-        </MapContainer>
+        <MapLegend sectionCount={sectionCount} />
 
-        <MapLegend />
-
-        {tooltip.visible && activeColors && (
-          <div
-            className="pointer-events-none absolute z-[900] max-w-[210px] rounded-2xl border bg-[#08162A]/90 px-3.5 py-3 shadow-[0_20px_54px_-26px_rgba(0,0,0,0.95)] backdrop-blur-xl"
-            style={{
-              left: shouldFlipTooltip ? tooltip.x - 14 : tooltip.x + 14,
-              top: Math.max(tooltip.y - 58, 16),
-              transform: shouldFlipTooltip ? 'translateX(-100%)' : undefined,
-              borderColor: activeColors.stroke,
-              boxShadow: `0 0 24px ${activeColors.glow}, 0 20px 54px -26px rgba(0,0,0,0.95)`,
-            }}
-          >
-            <div className="text-[0.58rem] font-bold uppercase tracking-[0.18em]" style={{ color: activeColors.hover }}>
-              CP {tooltip.cp} - {activeColors.name}
-            </div>
-            <div className="mt-1 text-sm font-semibold leading-tight text-white">{tooltip.label}</div>
-          </div>
-        )}
+        <div className="pointer-events-none absolute bottom-3 right-3 z-[800] rounded-full border border-[#0F2A4A]/10 bg-[#F7F2EA]/88 px-3 py-1 text-[0.58rem] font-bold text-[#0F2A4A]/76 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.75)] backdrop-blur-md">
+          Esri imagery | Cadastre Etalab
+        </div>
       </div>
     </div>
   )

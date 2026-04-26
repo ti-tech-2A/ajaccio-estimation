@@ -356,7 +356,7 @@ GitHub (repo privé) → Vercel (build + deploy) → IONOS (nom de domaine)
 | Page | Phrase de synthèse |
 | :---- | :---- |
 | `/marche/20000/` | "À Ajaccio (20000), secteur comprenant le centre-ville, le cours Napoléon, le quartier des Étrangers, Trottel, le Parc Berthault, la Terre Sacrée et la route des Sanguinaires, le prix médian au m² est de **X €** pour un appartement et **Y €** pour une villa, selon les données DVF actualisées au [date]." |
-| `/marche/20090/` | "À Ajaccio (20090), secteur englobant Aspretto et Campo dell'Oro, Pietralba, Bodiccione, l'Octroi, la Madonuccia, Binda, Saint-Joseph, Candia, Saint-Jean et La Pietrina / les Jardins de l'Empereur, le prix médian au m² est de **X €** pour un appartement et **Y €** pour une villa, selon les données DVF actualisées au [date]." |
+| `/marche/20090/` | "À Ajaccio (20090), secteur englobant Aspretto et Campo dell'Oro, Pietralba, Bodiccione, l'Octroi, Les Cannes - Les Salines, Binda, Saint-Joseph, Candia, Saint-Jean et La Pietrina / les Jardins de l'Empereur, le prix médian au m² est de **X €** pour un appartement et **Y €** pour une villa, selon les données DVF actualisées au [date]." |
 | `/marche/20167/` | "À Mezzavia, quartier d'Ajaccio (20167), le prix médian au m² est de **X €** pour un appartement et **Y €** pour une villa, selon les données DVF actualisées au [date]." |
 | `/marche/` | "Sur la commune d'Ajaccio, tous secteurs confondus (20000, 20090, 20167), le prix médian au m² est de **X €** pour un appartement et **Y €** pour une villa, selon les données DVF actualisées au [date]." |
 
@@ -629,7 +629,7 @@ Niveau 4 (V2) — Sections cadastrales par CP
   ├── Pietralba
   ├── Bodiccione
   ├── Octroi
-  ├── Madonuccia
+  ├── Les Cannes - Les Salines
   ├── Binda
   ├── Saint-Joseph
   ├── Candia
@@ -1224,7 +1224,7 @@ Tests de charge (trafic attendu faible au démarrage), snapshot testing, tests d
 - Aspretto / Campo dell'Oro (appartements récents, marché dynamique)
 - Bodiccione
 - Octroi
-- Madonuccia
+- Les Cannes - Les Salines
 - Binda
 - Saint-Joseph
 - Candia

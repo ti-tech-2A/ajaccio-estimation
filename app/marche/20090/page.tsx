@@ -14,9 +14,9 @@ import { MARKET_20090 } from '@/data/market-data'
 export const revalidate = 2592000
 
 export const metadata: Metadata = {
-  title: 'Prix immobilier Ajaccio 20090 — DVF Aspretto, Bodiccione, Madonuccia',
+  title: 'Prix immobilier Ajaccio 20090 — DVF Aspretto, Bodiccione, Les Cannes - Les Salines',
   description:
-    "Prix au m², tendances DVF et transactions récentes à Ajaccio 20090 : Aspretto, Campo dell'Oro, Pietralba, Bodiccione, Octroi, Madonuccia, Binda, Saint-Joseph, Candia, Saint-Jean, La Pietrina. Données actualisées au 1er mai 2026.",
+    "Prix au m², tendances DVF et transactions récentes à Ajaccio 20090 : Aspretto, Campo dell'Oro, Pietralba, Bodiccione, Octroi, Les Cannes - Les Salines, Binda, Saint-Joseph, Candia, Saint-Jean, La Pietrina. Données actualisées au 1er mai 2026.",
   openGraph: {
     title: 'Prix immobilier Ajaccio 20090 — DVF Aspretto, Sud',
     description:
@@ -50,7 +50,7 @@ const URBANISME_ITEMS = [
   {
     title: "PLU — Plan Local d'Urbanisme",
     content:
-      "Zone UB/UC dominante dans le secteur sud. Développement résidentiel pavillonnaire autorisé dans les quartiers de Bodiccione et Madonuccia. Hauteurs généralement limitées à R+3.",
+      "Zone UB/UC dominante dans le secteur sud. Développement résidentiel pavillonnaire autorisé dans les quartiers de Bodiccione et Les Cannes - Les Salines. Hauteurs généralement limitées à R+3.",
   },
   {
     title: "PPRI — Plan de Prévention des Risques d'Inondation",
@@ -88,8 +88,8 @@ export default function Marche20090Page() {
         </h1>
         <DataFreshnessBadge />
         <p className="mt-4 text-[#5C5C5C] leading-relaxed max-w-3xl">
-          À Ajaccio (20090), secteur englobant Aspretto et Campo dell&apos;Oro, Pietralba, Bodiccione, l&apos;Octroi, la
-          Madonuccia, Binda, Saint-Joseph, Candia, Saint-Jean et La Pietrina / les Jardins de
+          À Ajaccio (20090), secteur englobant Aspretto et Campo dell&apos;Oro, Pietralba, Bodiccione, l&apos;Octroi,
+          Les Cannes - Les Salines, Binda, Saint-Joseph, Candia, Saint-Jean et La Pietrina / les Jardins de
           l&apos;Empereur, le prix médian au m² est de{' '}
           <strong className="text-[#1B4F72]">3 100 €</strong> pour un appartement et{' '}
           <strong className="text-[#1B4F72]">3 800 €</strong> pour une villa, selon les données DVF

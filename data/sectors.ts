@@ -116,9 +116,9 @@ export const SECTORS: Sector[] = [
     priority: 'mvp',
   },
   {
-    id: '20090-madonuccia',
+    id: '20090-les-cannes-les-salines',
     postalCode: '20090',
-    label: 'Madonuccia',
+    label: 'Les Cannes - Les Salines',
     description: 'Quartier résidentiel établi, desserte aisée',
     commune: 'Ajaccio',
     codeInsee: '2A004',

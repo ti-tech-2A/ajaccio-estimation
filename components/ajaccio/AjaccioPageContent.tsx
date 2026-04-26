@@ -63,7 +63,7 @@ const SECTOR_CARDS = [
   {
     cp: '20090',
     label: 'Ajaccio Sud',
-    description: "Aspretto, Madonuccia, Jardins de l'Empereur, Binda.",
+    description: "Aspretto, Les Cannes - Les Salines, Jardins de l'Empereur, Binda.",
     priceSqm: '3 100 €/m²',
     href: '/marche/20090',
   },
