@@ -1,16 +1,31 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet'
+import { GeoJSON, MapContainer, TileLayer, ZoomControl, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import type { Feature, FeatureCollection, GeoJsonProperties, Geometry } from 'geojson'
 
 interface SectionLayerProps {
   data: FeatureCollection
+  sectionStats: SectionStatsMap
+  statsReady: boolean
 }
 
 type PostalZone = 'centre' | 'sud' | 'mezzavia'
+type SectionStatsMap = Record<string, { apartmentBuildings: number; villas: number; inhabitants: number | null }>
+
+interface CommuneTotals {
+  cadastralBuildings: number
+  housing: number
+  apartments: number
+  houses: number
+  otherHousing: number
+  cadastreSource: string
+  cadastreVintage: string
+  inseeSource: string
+  inseeVintage: string
+}
 
 interface ZoneStyle {
   name: string
@@ -51,6 +66,23 @@ function sectionName(feature?: Feature<Geometry, GeoJsonProperties>) {
   return section ? `Section ${section}` : 'Section cadastrale'
 }
 
+function sectionCode(feature?: Feature<Geometry, GeoJsonProperties>) {
+  return String(feature?.properties?.section ?? feature?.properties?.code ?? '').trim().toUpperCase()
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function formatInteger(value: number | null | undefined) {
+  return typeof value === 'number' && Number.isFinite(value) ? value.toLocaleString('fr-FR') : 'n/d'
+}
+
 function zoneForSection(section: string): PostalZone {
   const value = section.toUpperCase()
 
@@ -60,7 +92,41 @@ function zoneForSection(section: string): PostalZone {
   return 'centre'
 }
 
-function CadastralSections({ data }: SectionLayerProps) {
+function buildSectionTooltip(
+  feature: Feature<Geometry, GeoJsonProperties>,
+  sectionStats: SectionStatsMap,
+  statsReady: boolean,
+) {
+  const section = sectionCode(feature)
+  const stats = section ? sectionStats[section] : undefined
+  const apartmentBuildings = stats?.apartmentBuildings ?? 0
+  const villas = stats?.villas ?? 0
+  const inhabitants = typeof stats?.inhabitants === 'number' ? stats.inhabitants.toLocaleString('fr-FR') : 'n/d'
+  const hasStats = apartmentBuildings > 0 || villas > 0
+
+  const villasMarkup =
+    villas > 0
+      ? `<div class="earth-section-metric earth-section-metric--villa"><strong>${villas}</strong><span>Refs villas DVF</span></div>`
+      : ''
+
+  const metricsMarkup = `
+    <div class="earth-section-metrics">
+      <div class="earth-section-metric earth-section-metric--apartment"><strong>${apartmentBuildings}</strong><span>Refs appart. DVF</span></div>
+      ${villasMarkup}
+      <div class="earth-section-metric earth-section-metric--inhabitants"><strong>${inhabitants}</strong><span>Nbre habitants</span></div>
+    </div>
+    ${hasStats ? '' : `<div class="earth-section-empty">${statsReady ? 'Aucune reference DVF typee' : 'Stats DVF en cours'}</div>`}
+  `
+
+  return `
+    <div class="earth-section-card">
+      <div class="earth-section-title">${escapeHtml(sectionName(feature))}</div>
+      ${metricsMarkup}
+    </div>
+  `
+}
+
+function CadastralSections({ data, sectionStats, statsReady }: SectionLayerProps) {
   const styleFeature = (feature?: Feature<Geometry, GeoJsonProperties>) => {
     const section = String(feature?.properties?.section ?? feature?.properties?.code ?? '').trim()
     const colors = ZONE_COLORS[zoneForSection(section)]
@@ -81,13 +147,17 @@ function CadastralSections({ data }: SectionLayerProps) {
     const zone = zoneForSection(section)
     const colors = ZONE_COLORS[zone]
 
-    path.bindTooltip(`${sectionName(feature)} - ${colors.name}`, {
+    path.bindTooltip(buildSectionTooltip(feature, sectionStats, statsReady), {
       sticky: true,
       direction: 'top',
       className: 'earth-section-tooltip',
+      opacity: 1,
     })
 
     path.on({
+      click: () => {
+        path.openTooltip()
+      },
       mouseover: () => {
         path.setStyle({
           fillColor: colors.hoverFill,
@@ -106,12 +176,28 @@ function CadastralSections({ data }: SectionLayerProps) {
 
   return (
     <GeoJSON
-      key={data.features.length}
+      key={`${data.features.length}-${statsReady ? 'ready' : 'loading'}-${Object.keys(sectionStats).length}`}
       data={data}
       style={styleFeature}
       onEachFeature={onEachFeature}
     />
   )
+}
+
+function MapViewportSync() {
+  const map = useMap()
+
+  useEffect(() => {
+    const timers = [120, 450, 900].map((delay) =>
+      window.setTimeout(() => {
+        map.invalidateSize()
+      }, delay)
+    )
+
+    return () => timers.forEach((timer) => window.clearTimeout(timer))
+  }, [map])
+
+  return null
 }
 
 function MapLegend({ sectionCount }: { sectionCount: number }) {
@@ -149,6 +235,50 @@ function MapLegend({ sectionCount }: { sectionCount: number }) {
   )
 }
 
+function CommuneTotalsPanel({
+  totals,
+  statsReady,
+}: {
+  totals: CommuneTotals | null
+  statsReady: boolean
+}) {
+  const buildingValue = totals ? formatInteger(totals.cadastralBuildings) : statsReady ? 'n/d' : '...'
+  const apartmentsValue = totals ? formatInteger(totals.apartments) : statsReady ? 'n/d' : '...'
+  const housingValue = totals ? formatInteger(totals.housing) : '...'
+  const housesValue = totals ? formatInteger(totals.houses) : '...'
+  const vintage = totals ? `${totals.inseeVintage} - Cadastre` : 'Sources officielles'
+
+  return (
+    <div className="pointer-events-none absolute left-4 right-4 top-[88px] z-[800] rounded-2xl border border-white/14 bg-[#08162A]/82 p-3 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.92)] backdrop-blur-xl sm:left-auto sm:right-4 sm:top-[108px] sm:w-[268px]">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-white/50">
+          Stock commune
+        </span>
+        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-[#D4A853]">
+          {vintage}
+        </span>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2">
+          <strong className="block text-lg font-extrabold leading-none text-white">{buildingValue}</strong>
+          <span className="mt-1 block text-[0.64rem] font-bold leading-tight text-white/58">
+            Batiments cadastraux
+          </span>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2">
+          <strong className="block text-lg font-extrabold leading-none text-[#8CD3EE]">{apartmentsValue}</strong>
+          <span className="mt-1 block text-[0.64rem] font-bold leading-tight text-white/58">
+            Appartements INSEE
+          </span>
+        </div>
+      </div>
+      <p className="mt-2 text-[0.64rem] font-semibold leading-tight text-white/48">
+        {housingValue} logements au total - {housesValue} maisons.
+      </p>
+    </div>
+  )
+}
+
 function LoadingSkeleton() {
   return (
     <div className="absolute inset-0 z-[900] flex items-center justify-center rounded-[26px] bg-[#08162A]">
@@ -165,6 +295,9 @@ function LoadingSkeleton() {
 
 export default function CoverageMap() {
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null)
+  const [sectionStats, setSectionStats] = useState<SectionStatsMap>({})
+  const [communeTotals, setCommuneTotals] = useState<CommuneTotals | null>(null)
+  const [statsReady, setStatsReady] = useState(false)
   const [error, setError] = useState(false)
 
   useEffect(() => {
@@ -186,6 +319,37 @@ export default function CoverageMap() {
   }, [])
 
   useEffect(() => {
+    const controller = new AbortController()
+    let mounted = true
+
+    fetch('/api/cadastre/section-stats', { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        return response.json() as Promise<{ stats?: SectionStatsMap; communeTotals?: CommuneTotals }>
+      })
+      .then((payload) => {
+        if (mounted) {
+          setSectionStats(payload.stats ?? {})
+          setCommuneTotals(payload.communeTotals ?? null)
+        }
+      })
+      .catch((fetchError) => {
+        if ((fetchError as Error).name !== 'AbortError' && mounted) {
+          setSectionStats({})
+          setCommuneTotals(null)
+        }
+      })
+      .finally(() => {
+        if (mounted) setStatsReady(true)
+      })
+
+    return () => {
+      mounted = false
+      controller.abort()
+    }
+  }, [])
+
+  useEffect(() => {
     const id = 'coverage-map-earth-styles'
 
     if (document.getElementById(id)) return
@@ -200,45 +364,124 @@ export default function CoverageMap() {
         background: #071523;
         font-family: var(--font-body);
       }
-      .coverage-earth-frame .earth-map-tilt {
-        transform: perspective(980px) rotateX(46deg) rotateZ(-5.5deg) scale(1.45) translate3d(-1%, -9%, 0);
-        transform-origin: 50% 48%;
-        will-change: transform;
-      }
-      .coverage-earth-frame .leaflet-control-container {
-        display: none;
+      .coverage-earth-frame .earth-map-surface {
+        border-radius: 26px;
       }
       .coverage-earth-frame .leaflet-tile-pane {
-        filter: saturate(1.14) contrast(1.06) brightness(0.9);
+        filter: saturate(1.12) contrast(1.05) brightness(0.96);
       }
       .coverage-earth-frame .leaflet-overlay-pane {
-        filter: drop-shadow(0 16px 20px rgba(0,0,0,0.28));
+        filter: drop-shadow(0 10px 16px rgba(0,0,0,0.24));
       }
       .coverage-earth-frame .leaflet-interactive {
-        cursor: default;
+        cursor: pointer;
         transition: fill .22s ease, fill-opacity .22s ease, stroke .18s ease, stroke-width .18s ease, opacity .18s ease;
         vector-effect: non-scaling-stroke;
       }
-      .coverage-earth-frame .earth-section-tooltip.leaflet-tooltip {
-        border: 1px solid rgba(212,168,83,0.5);
+      .coverage-earth-frame .leaflet-control-container .leaflet-top.leaflet-right {
+        top: 14px;
+        right: 14px;
+      }
+      .coverage-earth-frame .leaflet-control-zoom {
+        overflow: hidden;
+        border: 1px solid rgba(247,242,234,0.16);
         border-radius: 14px;
-        background: rgba(8,22,42,0.9);
-        box-shadow: 0 0 22px rgba(212,168,83,0.32), 0 18px 48px -26px rgba(0,0,0,0.92);
+        background: rgba(8,22,42,0.8);
+        box-shadow: 0 18px 38px -24px rgba(0,0,0,0.92);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
+      .coverage-earth-frame .leaflet-control-zoom a {
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-bottom: 1px solid rgba(247,242,234,0.12);
+        background: transparent;
         color: #F7F2EA;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        padding: 7px 10px;
+        font: 700 22px/40px var(--font-body);
+        transition: background-color .18s ease, color .18s ease;
+      }
+      .coverage-earth-frame .leaflet-control-zoom a:last-child {
+        border-bottom: 0;
+      }
+      .coverage-earth-frame .leaflet-control-zoom a:hover,
+      .coverage-earth-frame .leaflet-control-zoom a:focus {
+        background: rgba(212,168,83,0.18);
+        color: #D4A853;
+      }
+      .coverage-earth-frame .earth-section-tooltip.leaflet-tooltip {
+        border: 0;
+        border-radius: 16px;
+        background: transparent;
+        box-shadow: 0 20px 54px -28px rgba(0,0,0,0.96);
+        color: #F7F2EA;
+        padding: 0;
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
       }
       .coverage-earth-frame .earth-section-tooltip.leaflet-tooltip::before {
         display: none;
       }
-      @media (max-width: 640px) {
-        .coverage-earth-frame .earth-map-tilt {
-          transform: perspective(760px) rotateX(42deg) rotateZ(-5deg) scale(1.62) translate3d(-1%, -7%, 0);
-        }
+      .coverage-earth-frame .earth-section-card {
+        min-width: 202px;
+        border: 1px solid rgba(212,168,83,0.32);
+        border-radius: 16px;
+        background: linear-gradient(180deg, rgba(8,22,42,0.94), rgba(7,21,35,0.88));
+        box-shadow: inset 0 1px 0 rgba(247,242,234,0.08), 0 0 24px rgba(212,168,83,0.16);
+        padding: 10px;
+      }
+      .coverage-earth-frame .earth-section-title {
+        color: #F7F2EA;
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1.05;
+        margin-bottom: 9px;
+      }
+      .coverage-earth-frame .earth-section-metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .coverage-earth-frame .earth-section-metric {
+        min-height: 54px;
+        border: 1px solid rgba(247,242,234,0.12);
+        border-radius: 11px;
+        background: rgba(247,242,234,0.06);
+        padding: 7px 8px;
+      }
+      .coverage-earth-frame .earth-section-metric strong {
+        display: block;
+        color: #FFFFFF;
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .coverage-earth-frame .earth-section-metric span {
+        display: block;
+        margin-top: 5px;
+        color: rgba(247,242,234,0.62);
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+      .coverage-earth-frame .earth-section-metric--villa strong {
+        color: #F0C77B;
+      }
+      .coverage-earth-frame .earth-section-metric--inhabitants {
+        grid-column: 1 / -1;
+        min-height: 50px;
+      }
+      .coverage-earth-frame .earth-section-metric--inhabitants strong {
+        color: #8CD3EE;
+      }
+      .coverage-earth-frame .earth-section-empty {
+        margin-top: 7px;
+        border-top: 1px solid rgba(247,242,234,0.08);
+        padding-top: 7px;
+        color: rgba(247,242,234,0.52);
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.2;
       }
     `
     document.head.appendChild(style)
@@ -255,23 +498,27 @@ export default function CoverageMap() {
       <div className="absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(212,168,83,0.52),rgba(46,134,171,0.24)_44%,rgba(247,242,234,0.08))]" />
 
       <div className="relative h-full overflow-hidden rounded-[26px]">
-        <div className="absolute inset-[-20%]">
+        <div className="absolute inset-0">
           <MapContainer
-            center={[41.9244, 8.7387]}
-            zoom={13}
-            className="earth-map-tilt"
-            scrollWheelZoom={false}
+            center={[41.9234, 8.7395]}
+            zoom={15}
+            minZoom={12}
+            maxZoom={18}
+            className="earth-map-surface h-full w-full"
+            scrollWheelZoom
             zoomControl={false}
             attributionControl={false}
-            dragging={false}
-            doubleClickZoom={false}
-            keyboard={false}
+            dragging
+            doubleClickZoom
+            keyboard
           >
             <TileLayer
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               attribution="Esri, Maxar, Earthstar Geographics"
             />
-            {geoData && <CadastralSections data={geoData} />}
+            <ZoomControl position="topright" />
+            <MapViewportSync />
+            {geoData && <CadastralSections data={geoData} sectionStats={sectionStats} statsReady={statsReady} />}
           </MapContainer>
         </div>
 
@@ -281,12 +528,14 @@ export default function CoverageMap() {
 
         <div className="pointer-events-none absolute left-4 top-4 z-[800] max-w-[calc(100%-2rem)] rounded-2xl border border-white/14 bg-[#08162A]/78 px-4 py-3 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.92)] backdrop-blur-xl">
           <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.2em] text-[#D4A853]">
-            Vue satellite 3D
+            Vue satellite HD
           </span>
           <span className="mt-1 block text-sm font-semibold leading-none text-white">
             Sections cadastrales Ajaccio
           </span>
         </div>
+
+        <CommuneTotalsPanel totals={communeTotals} statsReady={statsReady} />
 
         {!geoData && !error && <LoadingSkeleton />}
         {error && (
@@ -300,7 +549,7 @@ export default function CoverageMap() {
         <MapLegend sectionCount={sectionCount} />
 
         <div className="pointer-events-none absolute bottom-3 right-3 z-[800] rounded-full border border-[#0F2A4A]/10 bg-[#F7F2EA]/88 px-3 py-1 text-[0.58rem] font-bold text-[#0F2A4A]/76 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.75)] backdrop-blur-md">
-          Esri imagery | Cadastre Etalab
+          Esri imagery | Cadastre Etalab | INSEE RP2022
         </div>
       </div>
     </div>
