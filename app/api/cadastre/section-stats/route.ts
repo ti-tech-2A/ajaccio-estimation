@@ -28,17 +28,17 @@ interface MutableSectionStats {
 }
 
 const AJACCIO_INSEE = '2A004'
-const CADASTRE_BUILDINGS_URL =
-  'https://cadastre.data.gouv.fr/bundler/cadastre-etalab/communes/2A004/geojson/batiments'
-const FALLBACK_CADASTRAL_BUILDINGS = 14056
 const PAGE_SIZE = 1000
 const MAX_PAGES = 20
 
-const INSEE_COMMUNE_TOTALS = {
+const COMMUNE_TOTALS: CommuneTotals = {
+  cadastralBuildings: 14056,
   housing: 36362,
   apartments: 32311,
   houses: 3932,
   otherHousing: 119,
+  cadastreSource: 'Cadastre Etalab, couche batiments, commune 2A004',
+  cadastreVintage: 'Cadastre Etalab 2026',
   inseeSource: 'INSEE RP2022, LOG T2, commune COM-2A004',
   inseeVintage: 'RP2022',
 }
@@ -68,38 +68,9 @@ function propertyKey(row: Record<string, unknown>, section: string): string {
   return [section, streetNumber, streetName].filter(Boolean).join('|')
 }
 
-async function fetchCadastralBuildingCount(): Promise<number> {
-  try {
-    const response = await fetch(CADASTRE_BUILDINGS_URL, {
-      headers: { accept: 'application/json' },
-      next: { revalidate: 604800 },
-    })
-
-    if (!response.ok) {
-      return FALLBACK_CADASTRAL_BUILDINGS
-    }
-
-    const payload = (await response.json()) as { features?: unknown[] }
-    return Array.isArray(payload.features) ? payload.features.length : FALLBACK_CADASTRAL_BUILDINGS
-  } catch {
-    return FALLBACK_CADASTRAL_BUILDINGS
-  }
-}
-
-async function getCommuneTotals(): Promise<CommuneTotals> {
-  const cadastralBuildings = await fetchCadastralBuildingCount()
-
-  return {
-    cadastralBuildings,
-    ...INSEE_COMMUNE_TOTALS,
-    cadastreSource: 'Cadastre Etalab, couche batiments, commune 2A004',
-    cadastreVintage: 'Cadastre Etalab 2026',
-  }
-}
-
 export async function GET() {
   const supabase = getSupabaseReadClient()
-  const communeTotals = await getCommuneTotals()
+  const communeTotals = COMMUNE_TOTALS
 
   if (!supabase) {
     return Response.json(

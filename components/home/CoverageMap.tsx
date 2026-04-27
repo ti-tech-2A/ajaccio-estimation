@@ -101,21 +101,20 @@ function buildSectionTooltip(
   const stats = section ? sectionStats[section] : undefined
   const apartmentBuildings = stats?.apartmentBuildings ?? 0
   const villas = stats?.villas ?? 0
-  const inhabitants = typeof stats?.inhabitants === 'number' ? stats.inhabitants.toLocaleString('fr-FR') : 'n/d'
+  const inhabitants = typeof stats?.inhabitants === 'number' ? stats.inhabitants.toLocaleString('fr-FR') : null
   const hasStats = apartmentBuildings > 0 || villas > 0
 
-  const villasMarkup =
-    villas > 0
-      ? `<div class="earth-section-metric earth-section-metric--villa"><strong>${villas}</strong><span>Refs villas DVF</span></div>`
-      : ''
+  const inhabitantsMarkup = inhabitants
+    ? `<div class="earth-section-metric earth-section-metric--inhabitants"><strong>${inhabitants}</strong><span>Habitants</span></div>`
+    : ''
 
   const metricsMarkup = `
     <div class="earth-section-metrics">
-      <div class="earth-section-metric earth-section-metric--apartment"><strong>${apartmentBuildings}</strong><span>Refs appart. DVF</span></div>
-      ${villasMarkup}
-      <div class="earth-section-metric earth-section-metric--inhabitants"><strong>${inhabitants}</strong><span>Nbre habitants</span></div>
+      <div class="earth-section-metric earth-section-metric--apartment"><strong>${apartmentBuildings}</strong><span>Appart. DVF</span></div>
+      <div class="earth-section-metric earth-section-metric--villa"><strong>${villas}</strong><span>Villas DVF</span></div>
+      ${inhabitantsMarkup}
     </div>
-    ${hasStats ? '' : `<div class="earth-section-empty">${statsReady ? 'Aucune reference DVF typee' : 'Stats DVF en cours'}</div>`}
+    ${hasStats ? '' : `<div class="earth-section-empty">${statsReady ? 'Aucune ref. DVF typee' : 'Stats DVF en cours'}</div>`}
   `
 
   return `
@@ -202,40 +201,36 @@ function MapViewportSync() {
 
 function MapLegend({ sectionCount }: { sectionCount: number }) {
   return (
-    <div className="pointer-events-none absolute bottom-4 left-4 z-[800] w-[min(245px,calc(100%-2rem))] rounded-2xl border border-white/16 bg-[#08162A]/82 p-3.5 shadow-[0_22px_55px_-28px_rgba(0,0,0,0.9)] backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-white/50">
-          Cadastre officiel
+    <div className="pointer-events-none absolute bottom-12 left-3 right-3 z-[800] rounded-2xl border border-white/14 bg-[#08162A]/74 px-3 py-2.5 shadow-[0_18px_46px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-[calc(100%-10rem)]">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-white/52">
+          Cadastre <span className="text-[#C9A96E]">2A004</span>
         </span>
-        <span className="text-[0.62rem] font-medium text-[#C9A96E]">2A004</span>
-      </div>
-
-      <div className="mt-3 grid gap-2">
         {ZONE_ORDER.map((zone) => {
           const colors = ZONE_COLORS[zone]
 
           return (
-            <div key={zone} className="flex items-center gap-2.5">
+            <div key={zone} className="flex items-center gap-1.5">
               <span
-                className="h-3.5 w-3.5 rounded-[4px] border border-white/24"
+                className="h-2.5 w-2.5 rounded-[3px] border border-white/24"
                 style={{
                   background: `linear-gradient(135deg, ${colors.hoverFill}, ${colors.fill})`,
-                  boxShadow: `0 0 16px ${colors.glow}`,
+                  boxShadow: `0 0 12px ${colors.glow}`,
                 }}
               />
-              <span className="truncate text-xs font-semibold text-white/78">{colors.name}</span>
+              <span className="text-[0.7rem] font-semibold text-white/78">{colors.name}</span>
             </div>
           )
         })}
-        <div className="mt-1 border-t border-white/10 pt-2 text-xs font-medium text-white/58">
-          {sectionCount > 0 ? `${sectionCount} sections chargees` : 'Chargement en cours'}
-        </div>
+        <span className="text-[0.7rem] font-semibold text-white/52">
+          {sectionCount > 0 ? `${sectionCount} sections` : 'Chargement'}
+        </span>
       </div>
     </div>
   )
 }
 
-function CommuneTotalsPanel({
+function MapTopHud({
   totals,
   statsReady,
 }: {
@@ -246,35 +241,57 @@ function CommuneTotalsPanel({
   const apartmentsValue = totals ? formatInteger(totals.apartments) : statsReady ? 'n/d' : '...'
   const housingValue = totals ? formatInteger(totals.housing) : '...'
   const housesValue = totals ? formatInteger(totals.houses) : '...'
-  const vintage = totals ? `${totals.inseeVintage} - Cadastre` : 'Sources officielles'
 
   return (
-    <div className="pointer-events-none absolute left-4 right-4 top-[88px] z-[800] rounded-2xl border border-white/14 bg-[#08162A]/82 p-3 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.92)] backdrop-blur-xl sm:left-auto sm:right-4 sm:top-[108px] sm:w-[268px]">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-white/50">
-          Stock commune
+    <div className="pointer-events-none absolute left-3 right-3 top-3 z-[800] flex flex-col gap-2 sm:left-4 sm:right-4 sm:flex-row sm:items-start">
+      <div className="rounded-2xl border border-white/14 bg-[#08162A]/76 px-4 py-3 shadow-[0_18px_48px_-30px_rgba(0,0,0,0.92)] backdrop-blur-xl sm:w-[232px] md:w-[248px]">
+        <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.2em] text-[#D4A853]">
+          Vue satellite HD
         </span>
-        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-[#D4A853]">
-          {vintage}
+        <span className="mt-1 block text-sm font-semibold leading-none text-white">
+          Sections cadastrales Ajaccio
         </span>
       </div>
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        <div className="rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2">
-          <strong className="block text-lg font-extrabold leading-none text-white">{buildingValue}</strong>
-          <span className="mt-1 block text-[0.64rem] font-bold leading-tight text-white/58">
-            Batiments cadastraux
+
+      <div className="min-w-0 rounded-2xl border border-white/14 bg-[#08162A]/72 px-3 py-2.5 shadow-[0_18px_48px_-30px_rgba(0,0,0,0.92)] backdrop-blur-xl sm:ml-auto sm:flex-1 md:flex-none lg:w-[520px]">
+        <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
+          <span className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-white/48">
+            Stock commune
+          </span>
+          <span className="text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-[#D4A853]">
+            RP2022 - Cadastre
           </span>
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2">
-          <strong className="block text-lg font-extrabold leading-none text-[#8CD3EE]">{apartmentsValue}</strong>
-          <span className="mt-1 block text-[0.64rem] font-bold leading-tight text-white/58">
-            Appartements INSEE
-          </span>
+        <div className="grid grid-cols-3 divide-x divide-white/10 pt-2">
+          <div className="pr-3">
+            <strong className="block text-[clamp(1rem,2vw,1.25rem)] font-extrabold leading-none text-white">
+              {buildingValue}
+            </strong>
+            <span className="mt-1 block text-[0.62rem] font-bold leading-tight text-white/56">
+              Batiments
+            </span>
+          </div>
+          <div className="px-3">
+            <strong className="block text-[clamp(1rem,2vw,1.25rem)] font-extrabold leading-none text-[#8CD3EE]">
+              {apartmentsValue}
+            </strong>
+            <span className="mt-1 block text-[0.62rem] font-bold leading-tight text-white/56">
+              Appartements
+            </span>
+          </div>
+          <div className="pl-3">
+            <strong className="block text-[clamp(1rem,2vw,1.25rem)] font-extrabold leading-none text-[#F0C77B]">
+              {housingValue}
+            </strong>
+            <span className="mt-1 block text-[0.62rem] font-bold leading-tight text-white/56">
+              Logements
+            </span>
+          </div>
         </div>
+        <p className="mt-2 hidden text-[0.6rem] font-semibold leading-tight text-white/42 sm:block">
+          Dont {housesValue} maisons. Survoler une section pour les refs DVF.
+        </p>
       </div>
-      <p className="mt-2 text-[0.64rem] font-semibold leading-tight text-white/48">
-        {housingValue} logements au total - {housesValue} maisons.
-      </p>
     </div>
   )
 }
@@ -368,18 +385,21 @@ export default function CoverageMap() {
         border-radius: 26px;
       }
       .coverage-earth-frame .leaflet-tile-pane {
-        filter: saturate(1.12) contrast(1.05) brightness(0.96);
+        filter: saturate(1.08) contrast(1.02) brightness(1.02);
       }
       .coverage-earth-frame .leaflet-overlay-pane {
-        filter: drop-shadow(0 10px 16px rgba(0,0,0,0.24));
+        filter: drop-shadow(0 8px 12px rgba(0,0,0,0.18));
+      }
+      .coverage-earth-frame .leaflet-tooltip-pane {
+        z-index: 860;
       }
       .coverage-earth-frame .leaflet-interactive {
         cursor: pointer;
         transition: fill .22s ease, fill-opacity .22s ease, stroke .18s ease, stroke-width .18s ease, opacity .18s ease;
         vector-effect: non-scaling-stroke;
       }
-      .coverage-earth-frame .leaflet-control-container .leaflet-top.leaflet-right {
-        top: 14px;
+      .coverage-earth-frame .leaflet-control-container .leaflet-bottom.leaflet-right {
+        bottom: 54px;
         right: 14px;
       }
       .coverage-earth-frame .leaflet-control-zoom {
@@ -423,19 +443,20 @@ export default function CoverageMap() {
         display: none;
       }
       .coverage-earth-frame .earth-section-card {
-        min-width: 202px;
+        min-width: 174px;
+        max-width: 196px;
         border: 1px solid rgba(212,168,83,0.32);
-        border-radius: 16px;
-        background: linear-gradient(180deg, rgba(8,22,42,0.94), rgba(7,21,35,0.88));
-        box-shadow: inset 0 1px 0 rgba(247,242,234,0.08), 0 0 24px rgba(212,168,83,0.16);
-        padding: 10px;
+        border-radius: 14px;
+        background: linear-gradient(180deg, rgba(8,22,42,0.93), rgba(7,21,35,0.86));
+        box-shadow: inset 0 1px 0 rgba(247,242,234,0.08), 0 0 20px rgba(212,168,83,0.14);
+        padding: 9px;
       }
       .coverage-earth-frame .earth-section-title {
         color: #F7F2EA;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 800;
         line-height: 1.05;
-        margin-bottom: 9px;
+        margin-bottom: 8px;
       }
       .coverage-earth-frame .earth-section-metrics {
         display: grid;
@@ -443,16 +464,16 @@ export default function CoverageMap() {
         gap: 6px;
       }
       .coverage-earth-frame .earth-section-metric {
-        min-height: 54px;
+        min-height: 44px;
         border: 1px solid rgba(247,242,234,0.12);
-        border-radius: 11px;
+        border-radius: 10px;
         background: rgba(247,242,234,0.06);
-        padding: 7px 8px;
+        padding: 6px 7px;
       }
       .coverage-earth-frame .earth-section-metric strong {
         display: block;
         color: #FFFFFF;
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 800;
         line-height: 1;
       }
@@ -460,7 +481,7 @@ export default function CoverageMap() {
         display: block;
         margin-top: 5px;
         color: rgba(247,242,234,0.62);
-        font-size: 10px;
+        font-size: 9.5px;
         font-weight: 700;
         line-height: 1.1;
       }
@@ -469,7 +490,7 @@ export default function CoverageMap() {
       }
       .coverage-earth-frame .earth-section-metric--inhabitants {
         grid-column: 1 / -1;
-        min-height: 50px;
+        min-height: 42px;
       }
       .coverage-earth-frame .earth-section-metric--inhabitants strong {
         color: #8CD3EE;
@@ -483,6 +504,12 @@ export default function CoverageMap() {
         font-weight: 700;
         line-height: 1.2;
       }
+      @media (max-width: 640px) {
+        .coverage-earth-frame .leaflet-control-container .leaflet-bottom.leaflet-right {
+          bottom: 88px;
+          right: 12px;
+        }
+      }
     `
     document.head.appendChild(style)
   }, [])
@@ -491,7 +518,7 @@ export default function CoverageMap() {
 
   return (
     <div
-      className="coverage-earth-frame relative h-[360px] overflow-hidden rounded-[28px] border border-[#D4A853]/24 bg-[#071523] p-[1px] shadow-[0_38px_90px_-46px_rgba(15,42,74,0.98)] md:h-[500px]"
+      className="coverage-earth-frame relative h-[420px] overflow-hidden rounded-[28px] border border-[#D4A853]/24 bg-[#071523] p-[1px] shadow-[0_38px_90px_-46px_rgba(15,42,74,0.98)] md:h-[500px]"
       role="region"
       aria-label="Vue satellite des sections cadastrales couvertes a Ajaccio"
     >
@@ -516,26 +543,17 @@ export default function CoverageMap() {
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               attribution="Esri, Maxar, Earthstar Geographics"
             />
-            <ZoomControl position="topright" />
+            <ZoomControl position="bottomright" />
             <MapViewportSync />
             {geoData && <CadastralSections data={geoData} sectionStats={sectionStats} statsReady={statsReady} />}
           </MapContainer>
         </div>
 
-        <div className="pointer-events-none absolute inset-0 z-[650] bg-[radial-gradient(circle_at_28%_18%,rgba(247,242,234,0.12),transparent_25%),linear-gradient(180deg,rgba(7,21,35,0.06),rgba(7,21,35,0.32)_72%,rgba(7,21,35,0.58))]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] h-32 bg-gradient-to-b from-[#071523]/72 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[700] h-32 bg-gradient-to-t from-[#071523]/72 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 z-[650] bg-[radial-gradient(circle_at_28%_18%,rgba(247,242,234,0.08),transparent_25%),linear-gradient(180deg,rgba(7,21,35,0.04),rgba(7,21,35,0.16)_70%,rgba(7,21,35,0.36))]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] h-28 bg-gradient-to-b from-[#071523]/62 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[700] h-24 bg-gradient-to-t from-[#071523]/58 to-transparent" />
 
-        <div className="pointer-events-none absolute left-4 top-4 z-[800] max-w-[calc(100%-2rem)] rounded-2xl border border-white/14 bg-[#08162A]/78 px-4 py-3 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.92)] backdrop-blur-xl">
-          <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.2em] text-[#D4A853]">
-            Vue satellite HD
-          </span>
-          <span className="mt-1 block text-sm font-semibold leading-none text-white">
-            Sections cadastrales Ajaccio
-          </span>
-        </div>
-
-        <CommuneTotalsPanel totals={communeTotals} statsReady={statsReady} />
+        <MapTopHud totals={communeTotals} statsReady={statsReady} />
 
         {!geoData && !error && <LoadingSkeleton />}
         {error && (
@@ -548,7 +566,7 @@ export default function CoverageMap() {
 
         <MapLegend sectionCount={sectionCount} />
 
-        <div className="pointer-events-none absolute bottom-3 right-3 z-[800] rounded-full border border-[#0F2A4A]/10 bg-[#F7F2EA]/88 px-3 py-1 text-[0.58rem] font-bold text-[#0F2A4A]/76 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.75)] backdrop-blur-md">
+        <div className="pointer-events-none absolute bottom-3 right-3 z-[800] max-w-[calc(100%-1.5rem)] rounded-full border border-[#0F2A4A]/10 bg-[#F7F2EA]/86 px-3 py-1 text-[0.58rem] font-bold text-[#0F2A4A]/72 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.75)] backdrop-blur-md">
           Esri imagery | Cadastre Etalab | INSEE RP2022
         </div>
       </div>
