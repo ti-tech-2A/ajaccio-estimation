@@ -35,8 +35,6 @@ interface ZoneStyle {
   glow: string
 }
 
-const ZONE_ORDER: PostalZone[] = ['centre', 'sud', 'mezzavia']
-
 const ZONE_COLORS: Record<PostalZone, ZoneStyle> = {
   centre: {
     name: 'Centre',
@@ -199,98 +197,34 @@ function MapViewportSync() {
   return null
 }
 
-function MapLegend({ sectionCount }: { sectionCount: number }) {
-  return (
-    <div className="pointer-events-none absolute bottom-12 left-3 right-3 z-[800] rounded-2xl border border-white/14 bg-[#08162A]/74 px-3 py-2.5 shadow-[0_18px_46px_-30px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-[calc(100%-10rem)]">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="text-[0.58rem] font-semibold uppercase tracking-[0.16em] text-white/52">
-          Cadastre <span className="text-[#C9A96E]">2A004</span>
-        </span>
-        {ZONE_ORDER.map((zone) => {
-          const colors = ZONE_COLORS[zone]
-
-          return (
-            <div key={zone} className="flex items-center gap-1.5">
-              <span
-                className="h-2.5 w-2.5 rounded-[3px] border border-white/24"
-                style={{
-                  background: `linear-gradient(135deg, ${colors.hoverFill}, ${colors.fill})`,
-                  boxShadow: `0 0 12px ${colors.glow}`,
-                }}
-              />
-              <span className="text-[0.7rem] font-semibold text-white/78">{colors.name}</span>
-            </div>
-          )
-        })}
-        <span className="text-[0.7rem] font-semibold text-white/52">
-          {sectionCount > 0 ? `${sectionCount} sections` : 'Chargement'}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function MapTopHud({
-  totals,
-  statsReady,
-}: {
-  totals: CommuneTotals | null
-  statsReady: boolean
-}) {
-  const buildingValue = totals ? formatInteger(totals.cadastralBuildings) : statsReady ? 'n/d' : '...'
-  const apartmentsValue = totals ? formatInteger(totals.apartments) : statsReady ? 'n/d' : '...'
+function MapMetricsBar({ totals }: { totals: CommuneTotals | null }) {
   const housingValue = totals ? formatInteger(totals.housing) : '...'
+  const apartmentsValue = totals ? formatInteger(totals.apartments) : '...'
+  const buildingValue = totals ? formatInteger(totals.cadastralBuildings) : '...'
   const housesValue = totals ? formatInteger(totals.houses) : '...'
+  const metrics = [
+    { label: 'Nbre de logements', value: housingValue, tone: 'text-white' },
+    { label: 'Nbre appartements', value: apartmentsValue, tone: 'text-[#8CD3EE]' },
+    { label: 'Nbre bat. cadastrés', value: buildingValue, tone: 'text-[#F0C77B]' },
+    { label: 'Nbre villas', value: housesValue, tone: 'text-[#B9CA94]' },
+  ]
 
   return (
-    <div className="pointer-events-none absolute left-3 right-3 top-3 z-[800] flex flex-col gap-2 sm:left-4 sm:right-4 sm:flex-row sm:items-start">
-      <div className="rounded-2xl border border-white/14 bg-[#08162A]/76 px-4 py-3 shadow-[0_18px_48px_-30px_rgba(0,0,0,0.92)] backdrop-blur-xl sm:w-[232px] md:w-[248px]">
-        <span className="block text-[0.58rem] font-semibold uppercase tracking-[0.2em] text-[#D4A853]">
-          Vue satellite HD
-        </span>
-        <span className="mt-1 block text-sm font-semibold leading-none text-white">
-          Sections cadastrales Ajaccio
-        </span>
-      </div>
-
-      <div className="min-w-0 rounded-2xl border border-white/14 bg-[#08162A]/72 px-3 py-2.5 shadow-[0_18px_48px_-30px_rgba(0,0,0,0.92)] backdrop-blur-xl sm:ml-auto sm:flex-1 md:flex-none lg:w-[520px]">
-        <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-2">
-          <span className="text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-white/48">
-            Stock commune
-          </span>
-          <span className="text-[0.58rem] font-semibold uppercase tracking-[0.14em] text-[#D4A853]">
-            RP2022 - Cadastre
-          </span>
-        </div>
-        <div className="grid grid-cols-3 divide-x divide-white/10 pt-2">
-          <div className="pr-3">
-            <strong className="block text-[clamp(1rem,2vw,1.25rem)] font-extrabold leading-none text-white">
-              {buildingValue}
+    <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[820] sm:inset-x-4 sm:bottom-4">
+      <div className="grid grid-cols-4 gap-1.5 rounded-[18px] border border-white/16 bg-[#071523]/78 p-1.5 shadow-[0_22px_56px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:gap-2 sm:p-2">
+        {metrics.map((metric) => (
+          <div
+            key={metric.label}
+            className="min-w-0 rounded-[13px] border border-white/10 bg-white/[0.065] px-1.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:px-3 sm:py-2.5"
+          >
+            <strong className={`block text-center text-[clamp(0.86rem,2.3vw,1.25rem)] font-extrabold leading-none ${metric.tone}`}>
+              {metric.value}
             </strong>
-            <span className="mt-1 block text-[0.62rem] font-bold leading-tight text-white/56">
-              Batiments
+            <span className="mx-auto mt-1.5 block min-h-[1.9em] max-w-[7.2rem] text-center text-[0.48rem] font-bold uppercase leading-[0.95] tracking-[0.08em] text-white/58 sm:min-h-0 sm:text-[0.58rem]">
+              {metric.label}
             </span>
           </div>
-          <div className="px-3">
-            <strong className="block text-[clamp(1rem,2vw,1.25rem)] font-extrabold leading-none text-[#8CD3EE]">
-              {apartmentsValue}
-            </strong>
-            <span className="mt-1 block text-[0.62rem] font-bold leading-tight text-white/56">
-              Appartements
-            </span>
-          </div>
-          <div className="pl-3">
-            <strong className="block text-[clamp(1rem,2vw,1.25rem)] font-extrabold leading-none text-[#F0C77B]">
-              {housingValue}
-            </strong>
-            <span className="mt-1 block text-[0.62rem] font-bold leading-tight text-white/56">
-              Logements
-            </span>
-          </div>
-        </div>
-        <p className="mt-2 hidden text-[0.6rem] font-semibold leading-tight text-white/42 sm:block">
-          Dont {housesValue} maisons. Survoler une section pour les refs DVF.
-        </p>
+        ))}
       </div>
     </div>
   )
@@ -398,9 +332,9 @@ export default function CoverageMap() {
         transition: fill .22s ease, fill-opacity .22s ease, stroke .18s ease, stroke-width .18s ease, opacity .18s ease;
         vector-effect: non-scaling-stroke;
       }
-      .coverage-earth-frame .leaflet-control-container .leaflet-bottom.leaflet-right {
-        bottom: 54px;
-        right: 14px;
+      .coverage-earth-frame .leaflet-control-container .leaflet-top.leaflet-right {
+        top: 12px;
+        right: 12px;
       }
       .coverage-earth-frame .leaflet-control-zoom {
         overflow: hidden;
@@ -504,27 +438,19 @@ export default function CoverageMap() {
         font-weight: 700;
         line-height: 1.2;
       }
-      @media (max-width: 640px) {
-        .coverage-earth-frame .leaflet-control-container .leaflet-bottom.leaflet-right {
-          bottom: 88px;
-          right: 12px;
-        }
-      }
     `
     document.head.appendChild(style)
   }, [])
 
-  const sectionCount = geoData?.features.length ?? 0
-
   return (
     <div
-      className="coverage-earth-frame relative h-[420px] overflow-hidden rounded-[28px] border border-[#D4A853]/24 bg-[#071523] p-[1px] shadow-[0_38px_90px_-46px_rgba(15,42,74,0.98)] md:h-[500px]"
+      className="coverage-earth-frame relative h-[300px] overflow-hidden rounded-[24px] border border-[#D4A853]/24 bg-[#071523] p-[1px] shadow-[0_32px_74px_-44px_rgba(15,42,74,0.98)] md:h-[360px]"
       role="region"
       aria-label="Vue satellite des sections cadastrales couvertes a Ajaccio"
     >
-      <div className="absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(212,168,83,0.52),rgba(46,134,171,0.24)_44%,rgba(247,242,234,0.08))]" />
+      <div className="absolute inset-0 rounded-[24px] bg-[linear-gradient(135deg,rgba(212,168,83,0.52),rgba(46,134,171,0.24)_44%,rgba(247,242,234,0.08))]" />
 
-      <div className="relative h-full overflow-hidden rounded-[26px]">
+      <div className="relative h-full overflow-hidden rounded-[22px]">
         <div className="absolute inset-0">
           <MapContainer
             center={[41.9234, 8.7395]}
@@ -543,7 +469,7 @@ export default function CoverageMap() {
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               attribution="Esri, Maxar, Earthstar Geographics"
             />
-            <ZoomControl position="bottomright" />
+            <ZoomControl position="topright" />
             <MapViewportSync />
             {geoData && <CadastralSections data={geoData} sectionStats={sectionStats} statsReady={statsReady} />}
           </MapContainer>
@@ -553,7 +479,7 @@ export default function CoverageMap() {
         <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] h-28 bg-gradient-to-b from-[#071523]/62 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[700] h-24 bg-gradient-to-t from-[#071523]/58 to-transparent" />
 
-        <MapTopHud totals={communeTotals} statsReady={statsReady} />
+        <MapMetricsBar totals={communeTotals} />
 
         {!geoData && !error && <LoadingSkeleton />}
         {error && (
@@ -564,11 +490,6 @@ export default function CoverageMap() {
           </div>
         )}
 
-        <MapLegend sectionCount={sectionCount} />
-
-        <div className="pointer-events-none absolute bottom-3 right-3 z-[800] max-w-[calc(100%-1.5rem)] rounded-full border border-[#0F2A4A]/10 bg-[#F7F2EA]/86 px-3 py-1 text-[0.58rem] font-bold text-[#0F2A4A]/72 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.75)] backdrop-blur-md">
-          Esri imagery | Cadastre Etalab | INSEE RP2022
-        </div>
       </div>
     </div>
   )

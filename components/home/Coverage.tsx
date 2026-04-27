@@ -9,8 +9,8 @@ import { DataFreshnessBadge } from '@/components/market/DataFreshnessBadge'
 const CoverageMap = dynamic(() => import('./CoverageMap'), {
   ssr: false,
   loading: () => (
-    <div className="h-[360px] rounded-[28px] border border-[#D4A853]/20 bg-[#071523] shadow-[0_38px_90px_-46px_rgba(15,42,74,0.98)] md:h-[500px]">
-      <div className="h-full rounded-[26px] bg-[radial-gradient(circle_at_30%_18%,rgba(46,134,171,0.24),transparent_34%),radial-gradient(circle_at_72%_78%,rgba(212,168,83,0.18),transparent_38%)] animate-pulse" />
+    <div className="h-[300px] rounded-[24px] border border-[#D4A853]/20 bg-[#071523] shadow-[0_32px_74px_-44px_rgba(15,42,74,0.98)] md:h-[360px]">
+      <div className="h-full rounded-[22px] bg-[radial-gradient(circle_at_30%_18%,rgba(46,134,171,0.24),transparent_34%),radial-gradient(circle_at_72%_78%,rgba(212,168,83,0.18),transparent_38%)] animate-pulse" />
     </div>
   ),
 })
