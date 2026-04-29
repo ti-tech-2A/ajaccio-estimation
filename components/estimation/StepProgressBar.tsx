@@ -12,7 +12,7 @@ export default function StepProgressBar({ currentStep, totalSteps }: StepProgres
 
   return (
     <div className="mb-8">
-      <p className="text-sm font-[family-name:var(--font-open-sans)] text-[#9B9B9B] mb-2">
+      <p className="text-sm font-[family-name:var(--font-open-sans)] text-[#666666] mb-2">
         Étape {currentStep} sur {totalSteps}
       </p>
       <div className="bg-gray-200 rounded-full h-1.5 overflow-hidden">

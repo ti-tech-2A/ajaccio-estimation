@@ -153,7 +153,7 @@ export default function PhotoGrid() {
         </motion.div>
 
         {/* Bottom tagline */}
-        <p className="mt-8 text-center text-[#8896A5] text-sm font-[family-name:var(--font-dm-sans)] italic">
+        <p className="mt-8 text-center text-[#5E6E7E] text-sm font-[family-name:var(--font-dm-sans)] italic">
           Chaque secteur a ses propres dynamiques de prix — notre outil IA analyse les données par quartier, par rue, par adresse, par résidence.
         </p>
       </div>

@@ -346,7 +346,7 @@ export default function FaqPageContent() {
 
       {/* Footer CTA */}
       <div className="mt-16 text-center">
-        <p className="font-[family-name:var(--font-open-sans)] text-sm text-[#9B9B9B] mb-2">
+        <p className="font-[family-name:var(--font-open-sans)] text-sm text-[#666666] mb-2">
           Vous avez une autre question ?
         </p>
         <Link href="/expert" className="text-[#2E86AB] hover:underline text-sm font-medium">

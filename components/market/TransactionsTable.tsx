@@ -46,7 +46,7 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-[#9B9B9B] mt-3">
+      <p className="text-xs text-[#666666] mt-3">
         Source :{' '}
         <a
           href="https://app.dvf.etalab.gouv.fr/"

@@ -30,7 +30,7 @@ export function MarketTabs() {
                 'inline-block px-4 py-3.5 text-sm font-medium transition-colors duration-150 border-b-2',
                 isActive
                   ? 'border-[#2E86AB] text-[#2E86AB] font-semibold'
-                  : 'border-transparent text-[#9B9B9B] hover:text-[#1B4F72]',
+                  : 'border-transparent text-[#666666] hover:text-[#1B4F72]',
               ].join(' ')}
               aria-current={isActive ? 'page' : undefined}
             >

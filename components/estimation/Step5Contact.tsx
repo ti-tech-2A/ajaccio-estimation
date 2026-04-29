@@ -18,7 +18,7 @@ const inputClass = [
   'w-full px-4 py-3 rounded-xl border border-gray-200',
   'focus:outline-none focus:ring-2 focus:ring-[#2E86AB] focus:ring-offset-1',
   'text-[#5C5C5C] font-[family-name:var(--font-open-sans)]',
-  'placeholder:text-[#9B9B9B]',
+  'placeholder:text-[#666666]',
 ].join(' ')
 
 export default function Step5Contact({ value, onChange, errors }: Step5ContactProps) {
@@ -27,7 +27,7 @@ export default function Step5Contact({ value, onChange, errors }: Step5ContactPr
       <h2 className="text-2xl font-[family-name:var(--font-poppins)] font-semibold text-[#1B4F72] mb-2">
         Où envoyer votre estimation ?
       </h2>
-      <p className="text-[#9B9B9B] font-[family-name:var(--font-open-sans)] mb-8">
+      <p className="text-[#666666] font-[family-name:var(--font-open-sans)] mb-8">
         Votre estimation gratuite et sans engagement, directement dans votre boîte mail.
       </p>
 

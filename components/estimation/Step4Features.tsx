@@ -77,7 +77,7 @@ export default function Step4Features({
       <h2 className="text-2xl font-[family-name:var(--font-poppins)] font-semibold text-[#1B4F72] mb-2">
         État et prestations
       </h2>
-      <p className="text-[#9B9B9B] font-[family-name:var(--font-open-sans)] mb-8">
+      <p className="text-[#666666] font-[family-name:var(--font-open-sans)] mb-8">
         Ces éléments influencent directement la valeur de votre bien.
       </p>
 
@@ -116,7 +116,7 @@ export default function Step4Features({
       <div>
         <p className="text-sm font-semibold font-[family-name:var(--font-open-sans)] text-[#1B4F72] mb-3">
           Prestations et points forts{' '}
-          <span className="text-[#9B9B9B] font-normal">(sélection multiple)</span>
+          <span className="text-[#666666] font-normal">(sélection multiple)</span>
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {availableFeatures.map((feature) => {

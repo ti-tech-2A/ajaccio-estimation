@@ -79,7 +79,7 @@ export default function MarketCarousel() {
               <br />à Ajaccio
             </h2>
           </div>
-          <p className="text-white/40 text-sm font-[family-name:var(--font-dm-sans)] md:text-right">
+          <p className="text-white/55 text-sm font-[family-name:var(--font-dm-sans)] md:text-right">
             Actualisées au{' '}
             <time dateTime="2026-05-01" className="text-white/70">
               1er mai 2026
@@ -125,7 +125,7 @@ export default function MarketCarousel() {
               >
                 {zone.zone}
               </h3>
-              <p className="text-white/40 text-sm font-[family-name:var(--font-dm-sans)] mb-8 leading-relaxed">
+              <p className="text-white/55 text-sm font-[family-name:var(--font-dm-sans)] mb-8 leading-relaxed">
                 {zone.highlight}
               </p>
 
@@ -160,11 +160,11 @@ export default function MarketCarousel() {
               {/* Stats row */}
               <div className="flex gap-8">
                 <div>
-                  <p className="text-white/40 text-xs font-[family-name:var(--font-dm-sans)] mb-0.5">Transactions 12 mois</p>
+                  <p className="text-white/55 text-xs font-[family-name:var(--font-dm-sans)] mb-0.5">Transactions 12 mois</p>
                   <p className="text-white font-[family-name:var(--font-dm-sans)] font-semibold">{zone.transactions}</p>
                 </div>
                 <div>
-                  <p className="text-white/40 text-xs font-medium mb-0.5">Évolution annuelle</p>
+                  <p className="text-white/55 text-xs font-medium mb-0.5">Évolution annuelle</p>
                   <p className="text-[#C9A96E] font-semibold">{zone.evolution}</p>
                 </div>
               </div>
@@ -182,7 +182,7 @@ export default function MarketCarousel() {
                 >
                   Consultez les dernières<br />transactions notariées
                 </p>
-                <p className="text-white/40 text-sm font-[family-name:var(--font-dm-sans)] leading-relaxed">
+                <p className="text-white/55 text-sm font-[family-name:var(--font-dm-sans)] leading-relaxed">
                   Graphiques de tendances, segmentation par type de bien, données DVF filtrées secteur par secteur.
                 </p>
               </div>
@@ -201,7 +201,7 @@ export default function MarketCarousel() {
 
         {/* Bottom line */}
         <div className="mt-16 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <p className="text-white/30 text-xs font-[family-name:var(--font-dm-sans)]">
+          <p className="text-white/50 text-xs font-[family-name:var(--font-dm-sans)]">
             Source :{' '}
             <a
               href="https://app.dvf.etalab.gouv.fr/"

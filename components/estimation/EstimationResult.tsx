@@ -52,12 +52,12 @@ export default function EstimationResult({
       ) : (
         <div>
           <div className="text-center mb-8">
-            <p className="text-sm font-[family-name:var(--font-open-sans)] text-[#9B9B9B] mb-3">
+            <p className="text-sm font-[family-name:var(--font-open-sans)] text-[#666666] mb-3">
               Estimation de votre bien
             </p>
             <p className="text-4xl md:text-5xl font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] leading-tight">
               {formatPrice(result.priceLow)} EUR{' '}
-              <span className="text-[#9B9B9B] font-normal">-</span>{' '}
+              <span className="text-[#666666] font-normal">-</span>{' '}
               {formatPrice(result.priceHigh)} EUR
             </p>
             <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
@@ -76,7 +76,7 @@ export default function EstimationResult({
             <DataFreshnessBadge variant="inline" showNextUpdate={false} />
           </div>
 
-          <p className="text-sm italic text-[#9B9B9B] mt-4 font-[family-name:var(--font-open-sans)]">
+          <p className="text-sm italic text-[#666666] mt-4 font-[family-name:var(--font-open-sans)]">
             Estimation indicative basee sur les donnees DVF. Pour une evaluation precise, faites
             appel a notre expert local.
           </p>

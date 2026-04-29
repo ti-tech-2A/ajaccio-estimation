@@ -32,7 +32,7 @@ export function DataFreshnessBadge({
   }
 
   return (
-    <p className="text-sm text-[#9B9B9B]">
+    <p className="text-sm text-[#666666]">
       {content}
     </p>
   )

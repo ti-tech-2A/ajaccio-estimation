@@ -21,7 +21,7 @@ export function FiscalMiniSim() {
         <div>
           <label
             htmlFor="vlc-input"
-            className="text-xs text-[#9B9B9B] block mb-1"
+            className="text-xs text-[#666666] block mb-1"
           >
             Valeur locative cadastrale (€)
           </label>
@@ -36,14 +36,14 @@ export function FiscalMiniSim() {
         </div>
         {hasResult && (
           <div className="bg-white rounded-lg px-4 py-3">
-            <p className="text-xs text-[#9B9B9B]">Taxe foncière estimée</p>
+            <p className="text-xs text-[#666666]">Taxe foncière estimée</p>
             <p className="text-xl font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72]">
               {taxe.toLocaleString('fr-FR')} €/an
             </p>
           </div>
         )}
       </div>
-      <p className="text-xs text-[#9B9B9B] mt-3">
+      <p className="text-xs text-[#666666] mt-3">
         Taux communal Ajaccio 2025 : 50,34 %.{' '}
         <Link href="/simulateur-fiscal" className="text-[#2E86AB] hover:underline">
           Simulateur complet →

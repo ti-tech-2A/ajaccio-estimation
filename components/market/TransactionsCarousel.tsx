@@ -52,7 +52,7 @@ function TransactionCard({ transaction: t, postalCode, index }: TransactionCardP
           {t.type === 'appartement' ? 'Appartement' : 'Villa'}
         </Badge>
       </div>
-      <p className="text-xs text-[#9B9B9B] mb-1">{t.street}</p>
+      <p className="text-xs text-[#666666] mb-1">{t.street}</p>
       <div className="flex items-baseline justify-between">
         <span className="text-sm text-[#5C5C5C]">{t.surface} m²</span>
         <span className="font-[family-name:var(--font-poppins)] font-semibold text-[#1B4F72]">
@@ -60,8 +60,8 @@ function TransactionCard({ transaction: t, postalCode, index }: TransactionCardP
         </span>
       </div>
       <div className="flex items-center justify-between mt-1">
-        <span className="text-xs text-[#9B9B9B]">{t.date}</span>
-        <span className="text-xs text-[#9B9B9B]">
+        <span className="text-xs text-[#666666]">{t.date}</span>
+        <span className="text-xs text-[#666666]">
           {t.pricePerSqm.toLocaleString('fr-FR')} €/m²
         </span>
       </div>

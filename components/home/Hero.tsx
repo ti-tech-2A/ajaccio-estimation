@@ -113,7 +113,7 @@ export default function Hero() {
                   onClick={() => router.push(`/estimer?type=${value}`)}
                   className="group flex flex-col items-center justify-center gap-2 rounded-xl border border-[#1B4F72]/10 bg-white py-4 transition-all hover:border-[#2E86AB] hover:bg-[#D6EEF5] hover:shadow-sm"
                 >
-                  <Icon size={28} className="text-[#9B9B9B] transition-colors group-hover:text-[#2E86AB]" />
+                  <Icon size={28} className="text-[#666666] transition-colors group-hover:text-[#2E86AB]" />
                   <span className="text-xs font-semibold text-[#5C5C5C] md:text-sm group-hover:text-[#1B4F72]">
                     {label}
                   </span>

@@ -108,7 +108,7 @@ export default function AjaccioPageContent() {
       <aside className="hidden lg:block">
         <div className="sticky top-24">
           <nav aria-label="Table des matières">
-            <p className="font-[family-name:var(--font-poppins)] text-xs font-semibold text-[#9B9B9B] uppercase tracking-wider mb-4">
+            <p className="font-[family-name:var(--font-poppins)] text-xs font-semibold text-[#666666] uppercase tracking-wider mb-4">
               Sur cette page
             </p>
             <ul className="flex flex-col gap-2">
@@ -218,7 +218,7 @@ export default function AjaccioPageContent() {
                   key={stat.label}
                   className="bg-[#D6EEF5] rounded-xl p-4 flex flex-col gap-1"
                 >
-                  <p className="text-xs text-[#9B9B9B]">{stat.label}</p>
+                  <p className="text-xs text-[#666666]">{stat.label}</p>
                   <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">
                     {stat.value}
                   </p>
@@ -232,7 +232,7 @@ export default function AjaccioPageContent() {
                 Répartition du parc résidentiel
               </h3>
               <DemoPieChart />
-              <p className="text-xs text-[#9B9B9B] mt-4">
+              <p className="text-xs text-[#666666] mt-4">
                 Source :{' '}
                 <a
                   href="https://www.insee.fr/"
@@ -284,19 +284,19 @@ export default function AjaccioPageContent() {
                 </div>
                 <ul className="space-y-3 text-sm text-[#5C5C5C] font-[family-name:var(--font-open-sans)]">
                   <li className="flex justify-between border-b border-[#1B4F72]/10 pb-2">
-                    <span className="text-[#9B9B9B]">Âge moyen</span>
+                    <span className="text-[#666666]">Âge moyen</span>
                     <span className="font-semibold text-[#1B4F72]">42 ans</span>
                   </li>
                   <li className="flex justify-between border-b border-[#1B4F72]/10 pb-2">
-                    <span className="text-[#9B9B9B]">Budget</span>
+                    <span className="text-[#666666]">Budget</span>
                     <span className="font-semibold text-[#1B4F72]">250 000 – 400 000 €</span>
                   </li>
                   <li className="flex justify-between border-b border-[#1B4F72]/10 pb-2">
-                    <span className="text-[#9B9B9B]">Motivation</span>
+                    <span className="text-[#666666]">Motivation</span>
                     <span className="font-semibold text-[#1B4F72]">RP / Invest. locatif</span>
                   </li>
                   <li className="flex justify-between">
-                    <span className="text-[#9B9B9B]">Délai moyen</span>
+                    <span className="text-[#666666]">Délai moyen</span>
                     <span className="font-semibold text-[#1B4F72]">4 mois</span>
                   </li>
                 </ul>
@@ -314,19 +314,19 @@ export default function AjaccioPageContent() {
                 </div>
                 <ul className="space-y-3 text-sm text-[#5C5C5C] font-[family-name:var(--font-open-sans)]">
                   <li className="flex justify-between border-b border-[#C9A96E]/20 pb-2">
-                    <span className="text-[#9B9B9B]">Âge moyen</span>
+                    <span className="text-[#666666]">Âge moyen</span>
                     <span className="font-semibold text-[#1B4F72]">58 ans</span>
                   </li>
                   <li className="flex justify-between border-b border-[#C9A96E]/20 pb-2">
-                    <span className="text-[#9B9B9B]">Profil</span>
+                    <span className="text-[#666666]">Profil</span>
                     <span className="font-semibold text-[#1B4F72]">Succession / Déménagement</span>
                   </li>
                   <li className="flex justify-between border-b border-[#C9A96E]/20 pb-2">
-                    <span className="text-[#9B9B9B]">Délai de vente</span>
+                    <span className="text-[#666666]">Délai de vente</span>
                     <span className="font-semibold text-[#1B4F72]">3-6 mois</span>
                   </li>
                   <li className="flex justify-between">
-                    <span className="text-[#9B9B9B]">Prix constaté</span>
+                    <span className="text-[#666666]">Prix constaté</span>
                     <span className="font-semibold text-[#1B4F72]">-2 % à +3 % vs estimation</span>
                   </li>
                 </ul>

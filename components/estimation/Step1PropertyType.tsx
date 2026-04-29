@@ -22,7 +22,7 @@ export default function Step1PropertyType({ value, onChange }: Step1PropertyType
       <h2 className="text-2xl font-[family-name:var(--font-poppins)] font-semibold text-[#1B4F72] mb-2">
         Quel type de bien souhaitez-vous estimer ?
       </h2>
-      <p className="text-[#9B9B9B] font-[family-name:var(--font-open-sans)] mb-8">
+      <p className="text-[#666666] font-[family-name:var(--font-open-sans)] mb-8">
         Sélectionnez le type de votre propriété à Ajaccio.
       </p>
 
@@ -57,7 +57,7 @@ export default function Step1PropertyType({ value, onChange }: Step1PropertyType
             >
               <Icon
                 size={40}
-                color={isActive ? '#2E86AB' : '#9B9B9B'}
+                color={isActive ? '#2E86AB' : '#666666'}
               />
               <span
                 className={[
