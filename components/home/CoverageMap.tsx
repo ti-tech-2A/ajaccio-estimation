@@ -13,19 +13,19 @@ interface SectionLayerProps {
 }
 
 type PostalZone = 'centre' | 'sud' | 'mezzavia'
-type SectionStatsMap = Record<string, { apartmentBuildings: number; villas: number; inhabitants: number | null }>
+type SectionStatsMap = Record<
+  string,
+  {
+    cadastralBuildings: number
+    banAddresses: number | null
+    areaHectares: number
+    buildingDensityPerHectare: number
+    addressDensityPerHectare: number | null
+    densityLabel: string
+    inhabitants: number | null
+  }
+>
 
-interface CommuneTotals {
-  cadastralBuildings: number
-  housing: number
-  apartments: number
-  houses: number
-  otherHousing: number
-  cadastreSource: string
-  cadastreVintage: string
-  inseeSource: string
-  inseeVintage: string
-}
 
 interface ZoneStyle {
   name: string
@@ -81,6 +81,12 @@ function formatInteger(value: number | null | undefined) {
   return typeof value === 'number' && Number.isFinite(value) ? value.toLocaleString('fr-FR') : 'n/d'
 }
 
+function formatDecimal(value: number | null | undefined) {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? value.toLocaleString('fr-FR', { maximumFractionDigits: 1 })
+    : 'n/d'
+}
+
 function zoneForSection(section: string): PostalZone {
   const value = section.toUpperCase()
 
@@ -97,23 +103,18 @@ function buildSectionTooltip(
 ) {
   const section = sectionCode(feature)
   const stats = section ? sectionStats[section] : undefined
-  const apartmentBuildings = stats?.apartmentBuildings ?? 0
-  const villas = stats?.villas ?? 0
-  const inhabitants = typeof stats?.inhabitants === 'number' ? stats.inhabitants.toLocaleString('fr-FR') : null
-  const hasStats = apartmentBuildings > 0 || villas > 0
+  const hasStats = typeof stats?.cadastralBuildings === 'number'
 
-  const inhabitantsMarkup = inhabitants
-    ? `<div class="earth-section-metric earth-section-metric--inhabitants"><strong>${inhabitants}</strong><span>Habitants</span></div>`
-    : ''
-
-  const metricsMarkup = `
+  const metricsMarkup = hasStats
+    ? `
     <div class="earth-section-metrics">
-      <div class="earth-section-metric earth-section-metric--apartment"><strong>${apartmentBuildings}</strong><span>Appart. DVF</span></div>
-      <div class="earth-section-metric earth-section-metric--villa"><strong>${villas}</strong><span>Villas DVF</span></div>
-      ${inhabitantsMarkup}
+      <div class="earth-section-metric earth-section-metric--buildings"><strong>${formatInteger(stats?.cadastralBuildings)}</strong><span>B&acirc;timents</span></div>
+      <div class="earth-section-metric earth-section-metric--addresses"><strong>${formatInteger(stats?.banAddresses)}</strong><span>Adresses BAN</span></div>
+      <div class="earth-section-metric earth-section-metric--density"><strong>${formatDecimal(stats?.buildingDensityPerHectare)}</strong><span>B&acirc;ti / ha</span></div>
     </div>
-    ${hasStats ? '' : `<div class="earth-section-empty">${statsReady ? 'Aucune ref. DVF typee' : 'Stats DVF en cours'}</div>`}
+    <div class="earth-section-density-label">${escapeHtml(stats?.densityLabel ?? '')}</div>
   `
+    : `<div class="earth-section-empty">${statsReady ? 'Donnees cadastre indisponibles' : 'Stats cadastre en cours'}</div>`
 
   return `
     <div class="earth-section-card">
@@ -146,15 +147,13 @@ function CadastralSections({ data, sectionStats, statsReady }: SectionLayerProps
 
     path.bindTooltip(buildSectionTooltip(feature, sectionStats, statsReady), {
       sticky: true,
-      direction: 'top',
+      direction: 'auto',
+      offset: L.point(0, 10),
       className: 'earth-section-tooltip',
       opacity: 1,
     })
 
     path.on({
-      click: () => {
-        path.openTooltip()
-      },
       mouseover: () => {
         path.setStyle({
           fillColor: colors.hoverFill,
@@ -167,6 +166,7 @@ function CadastralSections({ data, sectionStats, statsReady }: SectionLayerProps
       },
       mouseout: () => {
         path.setStyle(styleFeature(feature))
+        path.closeTooltip()
       },
     })
   }
@@ -197,34 +197,45 @@ function MapViewportSync() {
   return null
 }
 
-function MapMetricsBar({ totals }: { totals: CommuneTotals | null }) {
-  const housingValue = totals ? formatInteger(totals.housing) : '...'
-  const apartmentsValue = totals ? formatInteger(totals.apartments) : '...'
-  const buildingValue = totals ? formatInteger(totals.cadastralBuildings) : '...'
-  const housesValue = totals ? formatInteger(totals.houses) : '...'
-  const metrics = [
-    { label: 'Nbre de logements', value: housingValue, tone: 'text-white' },
-    { label: 'Nbre appartements', value: apartmentsValue, tone: 'text-[#8CD3EE]' },
-    { label: 'Nbre bat. cadastrés', value: buildingValue, tone: 'text-[#F0C77B]' },
-    { label: 'Nbre villas', value: housesValue, tone: 'text-[#B9CA94]' },
+function MapInfoBar({ sectionCount }: { sectionCount: number }) {
+  const zones: { key: PostalZone; name: string; fill: string }[] = [
+    { key: 'centre', name: ZONE_COLORS.centre.name, fill: ZONE_COLORS.centre.fill },
+    { key: 'sud', name: ZONE_COLORS.sud.name, fill: ZONE_COLORS.sud.fill },
+    { key: 'mezzavia', name: ZONE_COLORS.mezzavia.name, fill: ZONE_COLORS.mezzavia.fill },
   ]
 
   return (
-    <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[820] sm:inset-x-4 sm:bottom-4">
-      <div className="grid grid-cols-4 gap-1.5 rounded-[18px] border border-white/16 bg-[#071523]/78 p-1.5 shadow-[0_22px_56px_-28px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:gap-2 sm:p-2">
-        {metrics.map((metric) => (
-          <div
-            key={metric.label}
-            className="min-w-0 rounded-[13px] border border-white/10 bg-white/[0.065] px-1.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:px-3 sm:py-2.5"
-          >
-            <strong className={`block text-center text-[clamp(0.86rem,2.3vw,1.25rem)] font-extrabold leading-none ${metric.tone}`}>
-              {metric.value}
-            </strong>
-            <span className="mx-auto mt-1.5 block min-h-[1.9em] max-w-[7.2rem] text-center text-[0.48rem] font-bold uppercase leading-[0.95] tracking-[0.08em] text-white/58 sm:min-h-0 sm:text-[0.58rem]">
-              {metric.label}
+    <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[820] sm:inset-x-4 sm:bottom-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[12px] border border-white/14 bg-[#071523]/82 px-3 py-2 shadow-[0_12px_32px_-18px_rgba(0,0,0,0.95)] backdrop-blur-xl">
+        <span className="text-[0.58rem] font-extrabold uppercase tracking-[0.2em] text-[#F0C77B]">
+          Cadastre 2A004
+        </span>
+        <span className="h-3 w-px bg-white/16" aria-hidden="true" />
+        <span className="flex items-center gap-2">
+          {zones.map((zone) => (
+            <span key={zone.key} className="flex items-center gap-1">
+              <span
+                className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                style={{ backgroundColor: zone.fill }}
+                aria-hidden="true"
+              />
+              <span className="text-[0.5rem] font-semibold uppercase tracking-[0.1em] text-white/60">
+                {zone.name}
+              </span>
             </span>
-          </div>
-        ))}
+          ))}
+        </span>
+        {sectionCount > 0 && (
+          <>
+            <span className="h-3 w-px bg-white/16" aria-hidden="true" />
+            <span className="text-[0.5rem] font-semibold text-white/55">
+              {sectionCount} sections
+            </span>
+          </>
+        )}
+        <span className="ml-auto hidden text-[0.44rem] font-medium text-white/36 sm:inline">
+          Esri imagery · Cadastre Etalab · INSEE RP2022
+        </span>
       </div>
     </div>
   )
@@ -247,7 +258,6 @@ function LoadingSkeleton() {
 export default function CoverageMap() {
   const [geoData, setGeoData] = useState<FeatureCollection | null>(null)
   const [sectionStats, setSectionStats] = useState<SectionStatsMap>({})
-  const [communeTotals, setCommuneTotals] = useState<CommuneTotals | null>(null)
   const [statsReady, setStatsReady] = useState(false)
   const [error, setError] = useState(false)
 
@@ -273,21 +283,19 @@ export default function CoverageMap() {
     const controller = new AbortController()
     let mounted = true
 
-    fetch('/api/cadastre/section-stats', { signal: controller.signal })
+    fetch('/api/cadastre/section-stats?metric=cadastre-density-addresses-v4', { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
-        return response.json() as Promise<{ stats?: SectionStatsMap; communeTotals?: CommuneTotals }>
+        return response.json() as Promise<{ stats?: SectionStatsMap }>
       })
       .then((payload) => {
         if (mounted) {
           setSectionStats(payload.stats ?? {})
-          setCommuneTotals(payload.communeTotals ?? null)
         }
       })
       .catch((fetchError) => {
         if ((fetchError as Error).name !== 'AbortError' && mounted) {
           setSectionStats({})
-          setCommuneTotals(null)
         }
       })
       .finally(() => {
@@ -377,8 +385,8 @@ export default function CoverageMap() {
         display: none;
       }
       .coverage-earth-frame .earth-section-card {
-        min-width: 174px;
-        max-width: 196px;
+        min-width: 206px;
+        max-width: 232px;
         border: 1px solid rgba(212,168,83,0.32);
         border-radius: 14px;
         background: linear-gradient(180deg, rgba(8,22,42,0.93), rgba(7,21,35,0.86));
@@ -419,8 +427,22 @@ export default function CoverageMap() {
         font-weight: 700;
         line-height: 1.1;
       }
-      .coverage-earth-frame .earth-section-metric--villa strong {
+      .coverage-earth-frame .earth-section-metric--density strong {
         color: #F0C77B;
+      }
+      .coverage-earth-frame .earth-section-metric--addresses strong {
+        color: #8CD3EE;
+      }
+      .coverage-earth-frame .earth-section-density-label {
+        margin-top: 7px;
+        border-top: 1px solid rgba(247,242,234,0.08);
+        padding-top: 7px;
+        color: rgba(247,242,234,0.62);
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1.15;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
       }
       .coverage-earth-frame .earth-section-metric--inhabitants {
         grid-column: 1 / -1;
@@ -479,7 +501,7 @@ export default function CoverageMap() {
         <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] h-28 bg-gradient-to-b from-[#071523]/62 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[700] h-24 bg-gradient-to-t from-[#071523]/58 to-transparent" />
 
-        <MapMetricsBar totals={communeTotals} />
+        <MapInfoBar sectionCount={geoData?.features.length ?? 0} />
 
         {!geoData && !error && <LoadingSkeleton />}
         {error && (
