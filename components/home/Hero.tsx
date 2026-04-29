@@ -134,27 +134,31 @@ export default function Hero() {
             <video
               ref={video1Ref}
               src="/video/ajaccio_video_2.mp4"
-              autoPlay
+              autoPlay={!reduceMotion}
               muted
               playsInline
+              aria-hidden="true"
               onEnded={handleVideoEnded}
-              onTimeUpdate={handleTimeUpdate}
+              onTimeUpdate={!reduceMotion ? handleTimeUpdate : undefined}
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${activeVideo === 1 ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
             />
-            <video
-              ref={video2Ref}
-              src="/video/ajaccio_video_2.mp4"
-              muted
-              playsInline
-              onEnded={handleVideoEnded}
-              onTimeUpdate={handleTimeUpdate}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${activeVideo === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-            />
+            {!reduceMotion && (
+              <video
+                ref={video2Ref}
+                src="/video/ajaccio_video_2.mp4"
+                muted
+                playsInline
+                aria-hidden="true"
+                onEnded={handleVideoEnded}
+                onTimeUpdate={handleTimeUpdate}
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out ${activeVideo === 2 ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+              />
+            )}
           </div>
 
           {/* Badge flottant bas-gauche */}
           <div className="absolute -bottom-4 -left-4 z-20 rounded-xl border border-[#1B4F72]/10 bg-white/90 px-4 py-2.5 text-sm font-medium text-[#1B4F72] shadow-[0_16px_32px_-20px_rgba(27,79,114,0.30)] backdrop-blur-sm">
-            📊 Données DVF + expertise locale Ajaccio
+            <span aria-hidden="true">📊</span>{' '}Données DVF + expertise locale Ajaccio
           </div>
         </motion.div>
 

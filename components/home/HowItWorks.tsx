@@ -54,7 +54,7 @@ function StepCard({
         0{index + 1}
       </span>
       <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#C9A96E]/22 text-[#C9A96E]">
-        <Icon size={20} />
+        <Icon size={20} aria-hidden="true" />
       </span>
       <h3
         className="mt-4 text-2xl font-bold leading-tight tracking-[-0.02em]"

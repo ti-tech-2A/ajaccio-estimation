@@ -82,9 +82,12 @@ export default function FaqAccordion() {
                 className="border-b border-[#EDE8DE] last:border-0"
               >
                 <button
+                  type="button"
+                  id={`faq-btn-${index}`}
                   className="flex justify-between items-center py-5 w-full text-left cursor-pointer group"
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   aria-expanded={isOpen}
+                  aria-controls={`faq-panel-${index}`}
                 >
                   <span
                     className="font-medium text-[#0F2A4A] pr-6 group-hover:text-[#C9A96E] transition-colors duration-200"
@@ -96,6 +99,7 @@ export default function FaqAccordion() {
                     animate={{ rotate: isOpen ? 45 : 0 }}
                     transition={{ duration: 0.2 }}
                     className="flex-shrink-0 w-6 h-6 rounded-full border border-[#C9A96E] flex items-center justify-center"
+                    aria-hidden="true"
                   >
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                       <path d="M5 1v8M1 5h8" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" />
@@ -106,6 +110,9 @@ export default function FaqAccordion() {
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
+                      id={`faq-panel-${index}`}
+                      role="region"
+                      aria-labelledby={`faq-btn-${index}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
@@ -127,7 +134,7 @@ export default function FaqAccordion() {
         </motion.div>
 
         {/* Footer link */}
-        <p className="mt-10 text-sm font-[family-name:var(--font-dm-sans)] text-[#8896A5]">
+        <p className="mt-10 text-sm font-[family-name:var(--font-dm-sans)] text-[#5E6E7E]">
           D&apos;autres questions ?{' '}
           <Link
             href="/faq"

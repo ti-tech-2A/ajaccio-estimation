@@ -98,9 +98,12 @@ export default function Footer() {
             </p>
 
             <div className="mt-6 rounded-2xl border border-white/14 bg-white/[0.04] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#C4813A]">
+              <label
+                htmlFor="footer-newsletter-email"
+                className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#C4813A]"
+              >
                 Recevoir les analyses DVF
-              </p>
+              </label>
               <AnimatePresence mode="wait">
                 {!submitted ? (
                   <motion.form
@@ -120,7 +123,8 @@ export default function Footer() {
                           setError(false)
                         }}
                         placeholder="votre@email.fr"
-                        className="min-h-11 flex-1 rounded-xl border border-white/20 bg-[#071628] px-4 py-2 text-sm text-white placeholder:text-white/35 focus:outline-none focus:ring-2 focus:ring-[#C4813A]/60"
+                        id="footer-newsletter-email"
+                        className="min-h-11 flex-1 rounded-xl border border-white/20 bg-[#071628] px-4 py-2 text-sm text-white placeholder:text-white/55 focus:outline-none focus:ring-2 focus:ring-[#C4813A]/60"
                       />
                       <button
                         type="submit"

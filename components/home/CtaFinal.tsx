@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, useInView } from 'framer-motion'
 import { ArrowRight, Check } from 'lucide-react'
+import BanAddressAutocomplete, { type BanAddressSuggestion } from '@/components/forms/BanAddressAutocomplete'
 import { fadeUp, staggerContainer } from '@/lib/motion'
 
 const BENEFITS = [
@@ -26,11 +27,20 @@ export default function CtaFinal() {
   const inView = useInView(ref, { once: true, amount: 0.15 })
   const router = useRouter()
   const [address, setAddress] = useState('')
+  const [postalCode, setPostalCode] = useState('')
+
+  function handleAddressChange(value: string, suggestion?: BanAddressSuggestion) {
+    setAddress(value)
+    setPostalCode(suggestion?.postcode ?? '')
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const params = address.trim() ? `?adresse=${encodeURIComponent(address.trim())}` : ''
-    router.push(`/estimer${params}`)
+    const params = new URLSearchParams()
+    if (address.trim()) params.set('adresse', address.trim())
+    if (postalCode) params.set('cp', postalCode)
+
+    router.push(params.size > 0 ? `/estimer?${params}` : '/estimer')
   }
 
   return (
@@ -68,13 +78,14 @@ export default function CtaFinal() {
                 >
                   Adresse du bien
                 </label>
-                <input
+                <BanAddressAutocomplete
                   id="cta-address"
-                  type="text"
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={handleAddressChange}
                   placeholder="Ex : 1 Cours Napoléon, 20000 Ajaccio"
-                  className="w-full rounded-[10px] border border-[#0F2A4A]/18 bg-[#F7F2EA] px-4 py-3.5 text-sm text-[#08162A] placeholder:text-[#8A9BB0] outline-none transition-all focus:border-[#C9A96E] focus:ring-2 focus:ring-[#C9A96E]/20"
+                  inputClassName="w-full rounded-[10px] border border-[#0F2A4A]/18 bg-[#F7F2EA] px-4 py-3.5 text-sm text-[#08162A] placeholder:text-[#8A9BB0] outline-none transition-all focus:border-[#C9A96E] focus:ring-2 focus:ring-[#C9A96E]/20"
+                  listClassName="absolute z-50 left-0 right-0 top-full mt-1 overflow-hidden rounded-[10px] border border-[#0F2A4A]/12 bg-white shadow-[0_18px_44px_-22px_rgba(15,42,74,0.42)]"
+                  optionClassName="w-full px-4 py-3 text-left text-sm text-[#4A5568] transition-colors hover:bg-[#F7F2EA] hover:text-[#0F2A4A]"
                 />
               </div>
 
@@ -85,6 +96,7 @@ export default function CtaFinal() {
                 Estimer mon bien
                 <ArrowRight
                   size={15}
+                  aria-hidden="true"
                   className="transition-transform duration-200 group-hover:translate-x-1"
                 />
               </button>
@@ -100,8 +112,8 @@ export default function CtaFinal() {
           <motion.div variants={fadeUp} className="flex flex-col justify-center gap-7">
             {BENEFITS.map((benefit) => (
               <div key={benefit.title} className="flex items-start gap-4">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#C9A96E]/15">
-                  <Check size={11} strokeWidth={2.5} className="text-[#C9A96E]" />
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#C9A96E]/15" aria-hidden="true">
+                  <Check size={11} strokeWidth={2.5} className="text-[#C9A96E]" aria-hidden="true" />
                 </span>
                 <div>
                   <p className="text-sm font-semibold leading-snug text-[#08162A]">

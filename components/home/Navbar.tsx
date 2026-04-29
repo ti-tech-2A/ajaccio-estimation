@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap'
 
 const NAV_LINKS = [
   { label: 'Marche', href: '/marche' },
@@ -13,12 +14,23 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useFocusTrap(menuRef, menuOpen)
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => {
       document.body.style.overflow = ''
     }
+  }, [menuOpen])
+
+  useEffect(() => {
+    function handleEsc(e: KeyboardEvent) {
+      if (e.key === 'Escape' && menuOpen) setMenuOpen(false)
+    }
+    document.addEventListener('keydown', handleEsc)
+    return () => document.removeEventListener('keydown', handleEsc)
   }, [menuOpen])
 
   return (
@@ -91,6 +103,8 @@ export default function Navbar() {
                 onClick={() => setMenuOpen((prev) => !prev)}
                 aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
                 aria-expanded={menuOpen}
+                aria-controls="mobile-menu"
+                aria-haspopup="dialog"
               >
                 {menuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -102,13 +116,18 @@ export default function Navbar() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            ref={menuRef}
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu mobile"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="fixed inset-0 z-40 bg-[#08162A]/95 backdrop-blur-xl"
           >
-            <nav className="flex h-full flex-col justify-center gap-3 px-8 pt-20">
+            <nav aria-label="Navigation mobile" className="flex h-full flex-col justify-center gap-3 px-8 pt-20">
               {NAV_LINKS.map((link, i) => (
                 <motion.div
                   key={link.href}

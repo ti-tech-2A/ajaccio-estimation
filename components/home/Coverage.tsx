@@ -84,7 +84,7 @@ export default function Coverage() {
                           className="flex items-center gap-2 text-[#4A5568] font-[family-name:var(--font-dm-sans)]"
                           style={{ fontSize: '14px' }}
                         >
-                          <span className="w-1 h-1 rounded-full bg-[#C9A96E] flex-shrink-0" />
+                          <span className="w-1 h-1 rounded-full bg-[#C9A96E] flex-shrink-0" aria-hidden="true" />
                           {sector.label}
                         </li>
                       ))}
@@ -93,7 +93,7 @@ export default function Coverage() {
                     {/* CP 20167 warning */}
                     {note && (
                       <div className="mt-3 flex items-start gap-2 bg-[#F7F2EA] rounded-lg px-3 py-2 border-l-2 border-[#C9A96E]">
-                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="flex-shrink-0 mt-0.5" aria-hidden="true">
                           <path d="M8 1.5L14.5 13H1.5L8 1.5z" stroke="#C9A96E" strokeWidth="1.25" strokeLinejoin="round" />
                           <path d="M8 6v3.5M8 11.5v.5" stroke="#C9A96E" strokeWidth="1.25" strokeLinecap="round" />
                         </svg>
@@ -119,8 +119,8 @@ export default function Coverage() {
 
             {/* Calendar badge */}
             <div className="bg-white rounded-2xl p-5 border border-[#EDE8DE] flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-[#0F2A4A] flex items-center justify-center flex-shrink-0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <div className="w-10 h-10 rounded-xl bg-[#0F2A4A] flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect x="3" y="4" width="18" height="18" rx="2" stroke="white" strokeWidth="1.5" />
                   <path d="M16 2v4M8 2v4M3 10h18" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
@@ -137,7 +137,7 @@ export default function Coverage() {
             </div>
 
             {/* Non-coverage note */}
-            <p className="text-[#8896A5] text-xs font-[family-name:var(--font-dm-sans)] leading-relaxed">
+            <p className="text-[#5E6E7E] text-xs font-[family-name:var(--font-dm-sans)] leading-relaxed">
               Porticcio, Bastelicaccia, Pietrosella et les autres communes du golfe ne sont <strong className="text-[#4A5568]">pas couverts</strong>. Notre outil est calibré exclusivement sur les données Ajaccio pour garantir la précision.
             </p>
           </motion.div>

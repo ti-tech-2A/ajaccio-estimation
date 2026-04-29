@@ -91,7 +91,7 @@ export default async function HomePage() {
   return (
     <div className="premium-home">
       <JsonLd data={faqSchema} />
-      <main className="relative z-10">
+      <main id="main-content" className="relative z-10">
         <Hero />
         <ProblemSection />
         <HowItWorks />

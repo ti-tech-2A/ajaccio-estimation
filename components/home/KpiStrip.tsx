@@ -24,7 +24,7 @@ function KpiItem({ end, suffix, label, sublabel, decimals = 0, hint }: HomeKpiMe
         {displayValue}
       </span>
       <div className="mt-1.5 flex items-center gap-2">
-        <span className="block text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-white/45">
+        <span className="block text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-white/55">
           {label}
         </span>
         {hint ? (
@@ -74,7 +74,7 @@ export default function KpiStrip({ metrics, sourceLabel }: KpiStripProps) {
             Notre moteur croise les ventes notariales DVF, les caractéristiques du bien et la
             granularité micro-secteur pour obtenir une valeur juste, défendable et exploitable.
           </p>
-          <p className="mt-4 text-xs text-white/45">{sourceLabel}</p>
+          <p className="mt-4 text-xs text-white/55">{sourceLabel}</p>
         </motion.div>
 
         <motion.div variants={fadeUp} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">

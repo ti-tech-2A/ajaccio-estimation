@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useReducedMotion } from 'framer-motion'
 import { Star } from 'lucide-react'
 import { TESTIMONIALS, type Testimonial } from '@/data/site-metadata'
 
@@ -50,7 +51,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
           <span className="block truncate text-[13px] font-semibold text-[#0F2A4A]">
             {testimonial.author}
           </span>
-          <span className="block truncate text-xs text-[#8896A5]">
+          <span className="block truncate text-xs text-[#5E6E7E]">
             {testimonial.sector} - {testimonial.postalCode}
           </span>
         </span>
@@ -77,15 +78,22 @@ function MarqueeRow({
   onMouseEnter,
   onMouseLeave,
 }: MarqueeRowProps) {
+  const reduceMotion = useReducedMotion()
   const animationName = direction === 'normal' ? 'marquee' : 'marquee-reverse'
   const repeated = [...testimonials, ...testimonials]
 
   return (
-    <div className="relative overflow-hidden" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <div
+      className="relative overflow-hidden"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onFocus={onMouseEnter}
+      onBlur={onMouseLeave}
+    >
       <div
         className="flex w-max gap-5 py-1"
         style={{
-          animation: `${animationName} 48s linear infinite`,
+          animation: reduceMotion ? 'none' : `${animationName} 48s linear infinite`,
           animationPlayState: paused ? 'paused' : 'running',
         }}
       >
@@ -143,7 +151,7 @@ export default function Testimonials() {
         />
       </div>
 
-      <p className="mt-7 text-center text-xs text-[#8896A5]">Survolez pour mettre en pause</p>
+      <p className="mt-7 text-center text-xs text-[#5E6E7E]">Survolez ou naviguez au clavier pour mettre en pause</p>
     </section>
   )
 }
