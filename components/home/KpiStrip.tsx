@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useId, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useCountUp } from '@/lib/hooks/useCountUp'
 import { fadeUp, staggerContainer } from '@/lib/motion'
@@ -9,6 +9,38 @@ import type { HomeKpiMetric } from '@/lib/server/market-signal'
 interface KpiStripProps {
   metrics: HomeKpiMetric[]
   sourceLabel: string
+}
+
+function KpiTooltip({ hint }: { hint: string }) {
+  const id = useId()
+  const [open, setOpen] = useState(false)
+
+  return (
+    <span className="relative">
+      <button
+        type="button"
+        aria-label={`Information : ${hint}`}
+        aria-describedby={open ? id : undefined}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/25 text-[0.58rem] font-semibold text-white/65 focus:outline-none focus:ring-1 focus:ring-white/50"
+      >
+        <span aria-hidden="true">i</span>
+      </button>
+      {open && (
+        <div
+          id={id}
+          role="tooltip"
+          className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded-lg bg-[#1a2d4a] px-3 py-2 text-xs leading-relaxed text-white/90 shadow-lg"
+        >
+          {hint}
+          <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-[#1a2d4a]" aria-hidden="true" />
+        </div>
+      )}
+    </span>
+  )
 }
 
 function KpiItem({ end, suffix, label, sublabel, decimals = 0, hint }: HomeKpiMetric) {
@@ -27,15 +59,7 @@ function KpiItem({ end, suffix, label, sublabel, decimals = 0, hint }: HomeKpiMe
         <span className="block text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-white/55">
           {label}
         </span>
-        {hint ? (
-          <span
-            className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white/25 text-[0.58rem] font-semibold text-white/65"
-            title={hint}
-            aria-label={hint}
-          >
-            i
-          </span>
-        ) : null}
+        {hint ? <KpiTooltip hint={hint} /> : null}
       </div>
       <span className="mt-1 block text-xs font-medium text-[#C9A96E]">{sublabel}</span>
     </div>

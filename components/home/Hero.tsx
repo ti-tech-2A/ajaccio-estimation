@@ -178,6 +178,7 @@ export default function Hero() {
       />
 
       <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+        <h2 className="sr-only">Chiffres clés</h2>
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
 
           {/* Carte 1 — Volume */}
