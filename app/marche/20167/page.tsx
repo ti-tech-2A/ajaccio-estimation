@@ -196,7 +196,7 @@ export default async function Marche20167Page() {
       <div className="bg-[#FAF5EC]/60 py-16 border-y border-[#C9A96E]/10">
         <div className="max-w-6xl mx-auto px-4 space-y-10">
           <SectionHeading
-            eyebrow="Tendances DVF"
+            eyebrow="Tendances Observées sur secteur"
             title="L'évolution des prix mois après mois, année après année"
             description="Médianes calculées en direct sur les données DVF filtrées Mezzavia (INSEE 2A004). Volumes faibles : interpréter avec prudence."
           />

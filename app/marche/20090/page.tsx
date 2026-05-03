@@ -185,7 +185,7 @@ export default async function Marche20090Page() {
       <div className="bg-[#FAF5EC]/60 py-16 border-y border-[#C9A96E]/10">
         <div className="max-w-6xl mx-auto px-4 space-y-10">
           <SectionHeading
-            eyebrow="Tendances DVF"
+            eyebrow="Tendances Observées sur secteur"
             title="L'évolution des prix mois après mois, année après année"
             description="Toutes les médianes ci-dessous sont calculées en direct sur la base DVF officielle, après suppression des valeurs aberrantes (P25–P75)."
           />
