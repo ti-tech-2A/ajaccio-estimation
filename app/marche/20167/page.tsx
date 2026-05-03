@@ -1,234 +1,485 @@
 import type { Metadata } from 'next'
 import React from 'react'
 import Link from 'next/link'
-import { AlertTriangle } from 'lucide-react'
-import { DataFreshnessBadge } from '@/components/market/DataFreshnessBadge'
+import { ArrowRight, CalendarClock, AlertTriangle } from 'lucide-react'
 import { PriceChart } from '@/components/market/PriceChart'
-import { SegmentChart } from '@/components/market/SegmentChart'
-import { TransactionsTable } from '@/components/market/TransactionsTable'
-import { FiscalMiniSim } from '@/components/market/FiscalMiniSim'
-import { UrbanismeAccordion } from '@/components/market/UrbanismeAccordion'
+import { YearlyEvolutionChart } from '@/components/market/YearlyEvolutionChart'
+import { SectorIntroduction } from '@/components/market/SectorIntroduction'
+import { MicroSectorsTable } from '@/components/market/MicroSectorsTable'
+import { TypologyPriceTable } from '@/components/market/TypologyPriceTable'
+import { BuyerProfilesTable } from '@/components/market/BuyerProfilesTable'
+import { FactorsGrid } from '@/components/market/FactorsGrid'
+import { LiveTransactionsTable } from '@/components/market/LiveTransactionsTable'
+import { SellerAdvice } from '@/components/market/SellerAdvice'
+import { FaqAccordion } from '@/components/market/FaqAccordion'
+import { MarketCTA } from '@/components/market/MarketCTA'
+import { MarketHero } from '@/components/market/MarketHero'
+import { SectionHeading } from '@/components/market/SectionHeading'
+import { DvfSalesMapClient } from '@/components/market/DvfSalesMapClient'
 import { JsonLd } from '@/components/ui/JsonLd'
-import { Button } from '@/components/ui/Button'
-import { MARKET_20167 } from '@/data/market-data'
+import { Badge } from '@/components/ui/Badge'
+import { getMarketPageData } from '@/lib/server/market-aggregates'
+import { SECTOR_20167 } from '@/data/sector-content/20167'
+import { DVF_LAST_UPDATE, DVF_LAST_UPDATE_LABEL } from '@/lib/constants'
 
 export const revalidate = 2592000
 
+const SECTOR = SECTOR_20167
+const POSTAL_CODE = '20167'
+const ZONE_LABEL = "Mezzavia · Quartier d'Ajaccio"
+
 export const metadata: Metadata = {
-  title: 'Prix immobilier Mezzavia Ajaccio 20167 — DVF',
-  description:
-    "Prix au m², tendances DVF et transactions récentes à Mezzavia, quartier d'Ajaccio (20167, INSEE 2A004). Données exclusivement pour la commune d'Ajaccio — Alata exclue. Données actualisées au 1er mai 2026.",
+  title: SECTOR.metaTitle,
+  description: SECTOR.metaDescription,
+  alternates: { canonical: `https://ajaccio-estimation.fr/marche/${POSTAL_CODE}` },
   openGraph: {
-    title: 'Prix immobilier Mezzavia Ajaccio 20167 — DVF',
-    description:
-      "Prix médian 2 900 €/m² pour un appartement, 3 500 €/m² pour une villa à Mezzavia (Ajaccio 20167). Données DVF officielles.",
-    url: 'https://ajaccio-estimation.fr/marche/20167',
+    title: SECTOR.metaTitle,
+    description: SECTOR.metaDescription,
+    url: `https://ajaccio-estimation.fr/marche/${POSTAL_CODE}`,
     type: 'website',
   },
 }
 
-const breadcrumbSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'BreadcrumbList',
-  itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Accueil', item: 'https://ajaccio-estimation.fr' },
-    { '@type': 'ListItem', position: 2, name: 'Marché', item: 'https://ajaccio-estimation.fr/marche' },
-    { '@type': 'ListItem', position: 3, name: 'Mezzavia 20167', item: 'https://ajaccio-estimation.fr/marche/20167' },
-  ],
-}
+export default async function Marche20167Page() {
+  const { aggregates, typology, monthly, yearly, transactions } =
+    await getMarketPageData(POSTAL_CODE)
 
-const datasetSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Dataset',
-  name: 'Prix immobiliers Mezzavia 20167 — DVF',
-  description:
-    "Données DVF agrégées pour Mezzavia (code postal 20167, commune d'Ajaccio, INSEE 2A004). Les données d'Alata ne sont pas incluses.",
-  url: 'https://ajaccio-estimation.fr/marche/20167',
-  creator: { '@type': 'Organization', name: 'ajaccio-estimation.fr' },
-  dateModified: '2026-05-01',
-}
+  const monthlyChartData = monthly.series
+    .filter((p) => p.medianSqm > 0)
+    .map((p) => ({ month: p.label, pricePerSqm: p.medianSqm }))
 
-const URBANISME_ITEMS = [
-  {
-    title: "PLU — Plan Local d'Urbanisme",
-    content:
-      "Zone AU (à urbaniser) et N (naturelle) prédominantes. Mezzavia conserve un caractère péri-urbain avec des hauteurs limitées à R+2 dans les nouvelles opérations. Consulter le PLU d'Ajaccio pour les parcelles concernées.",
-  },
-  {
-    title: "PPRI — Plan de Prévention des Risques d'Inondation",
-    content:
-      "Certaines parties du territoire de Mezzavia sont soumises à un aléa inondation lié aux cours d'eau secondaires. Vérifier la situation de la parcelle auprès de la mairie d'Ajaccio.",
-  },
-  {
-    title: 'Projets urbains',
-    content:
-      "Amélioration de la desserte en transport en commun vers le centre-ville. Études en cours pour l'extension de la zone d'activités.",
-  },
-]
+  // ─── Schemas ───────────────────────────────────────────────────────────────
 
-const { monthlyPrices, segments, recentTransactions } = MARKET_20167
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: 'https://ajaccio-estimation.fr' },
+      { '@type': 'ListItem', position: 2, name: 'Marché immobilier', item: 'https://ajaccio-estimation.fr/marche' },
+      { '@type': 'ListItem', position: 3, name: 'Mezzavia 20167', item: `https://ajaccio-estimation.fr/marche/${POSTAL_CODE}` },
+    ],
+  }
 
-export default function Marche20167Page() {
+  const datasetSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: "Prix immobiliers Mezzavia Ajaccio 20167 — DVF",
+    description: "Données DVF agrégées pour Mezzavia, quartier d'Ajaccio (code postal 20167, INSEE 2A004). Les transactions d'Alata sont exclues.",
+    url: `https://ajaccio-estimation.fr/marche/${POSTAL_CODE}`,
+    creator: { '@type': 'Organization', name: 'ajaccio-estimation.fr' },
+    isAccessibleForFree: true,
+    spatialCoverage: {
+      '@type': 'Place',
+      name: "Mezzavia — Ajaccio",
+      address: { '@type': 'PostalAddress', postalCode: POSTAL_CODE, addressLocality: 'Ajaccio', addressCountry: 'FR' },
+    },
+    dateModified: DVF_LAST_UPDATE,
+  }
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: SECTOR.faq.map((q) => ({
+      '@type': 'Question',
+      name: q.question,
+      acceptedAnswer: { '@type': 'Answer', text: q.answer },
+    })),
+  }
+
+  const realEstateListingSchema = transactions.rows.length
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: `Dernières transactions DVF — Mezzavia Ajaccio ${POSTAL_CODE}`,
+        itemListElement: transactions.rows.slice(0, 5).map((t, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          item: {
+            '@type': 'Residence',
+            name: `${t.type === 'villa' ? 'Villa' : 'Appartement'} — ${t.surface} m²`,
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: [t.number, t.street].filter(Boolean).join(' ') || undefined,
+              postalCode: POSTAL_CODE,
+              addressLocality: 'Ajaccio',
+              addressCountry: 'FR',
+            },
+            floorSize: { '@type': 'QuantitativeValue', value: t.surface, unitCode: 'MTK' },
+          },
+        })),
+      }
+    : null
+
   return (
-    <main className="max-w-5xl mx-auto px-4 pt-32 pb-10">
+    <main className="pt-28 pb-16">
       <JsonLd schema={breadcrumbSchema} />
       <JsonLd schema={datasetSchema} />
+      <JsonLd schema={faqSchema} />
+      {realEstateListingSchema && <JsonLd schema={realEstateListingSchema} />}
 
-      {/* Breadcrumb visual */}
-      <nav aria-label="Fil d'Ariane" className="text-sm text-[#9B9B9B] mb-6 flex items-center gap-2">
-        <Link href="/" className="hover:text-[#2E86AB]">Accueil</Link>
-        <span>/</span>
-        <Link href="/marche" className="hover:text-[#2E86AB]">Marché</Link>
-        <span>/</span>
-        <span className="text-[#1B4F72] font-medium" aria-current="page">Mezzavia 20167</span>
-      </nav>
-
-      {/* Mezzavia/Alata warning */}
-      <div className="flex items-start gap-3 p-4 bg-[#EDD9B3] rounded-xl mb-6 text-sm text-[#5C5C5C]">
-        <AlertTriangle size={18} className="text-[#C9A96E] shrink-0 mt-0.5" />
-        <span>
-          <strong className="text-[#1B4F72]">CP 20167 — Périmètre Mezzavia uniquement.</strong>{' '}
-          Cette page présente les données de Mezzavia, quartier de la commune d&apos;Ajaccio (INSEE
-          2A004). Les données d&apos;Alata, commune indépendante partageant ce code postal, ne sont pas
-          incluses.
-        </span>
-      </div>
-
-      {/* Section 1 — H1 + AEO */}
-      <div className="mb-8">
-        <h1 className="font-[family-name:var(--font-poppins)] text-3xl font-bold text-[#1B4F72] mb-2">
-          Prix immobilier Mezzavia — Ajaccio 20167
-        </h1>
-        <DataFreshnessBadge />
-        <p className="mt-4 text-[#5C5C5C] leading-relaxed max-w-3xl">
-          À Mezzavia, quartier d&apos;Ajaccio (20167), le prix médian au m² est de{' '}
-          <strong className="text-[#1B4F72]">2 900 €</strong> pour un appartement et{' '}
-          <strong className="text-[#1B4F72]">3 500 €</strong> pour une villa, selon les données DVF
-          actualisées au{' '}
-          <time dateTime="2026-05-01">1er mai 2026</time>.
-        </p>
-      </div>
-
-      {/* Section 2 — PriceChart */}
-      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-        <h2 className="font-[family-name:var(--font-poppins)] text-lg font-semibold text-[#1B4F72] mb-4">
-          Évolution des prix sur 24 mois (€/m²)
-        </h2>
-        <PriceChart data={monthlyPrices} />
-      </section>
-
-      {/* Section 3 — Transactions table */}
-      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-        <h2 className="font-[family-name:var(--font-poppins)] text-lg font-semibold text-[#1B4F72] mb-4">
-          Dernières transactions DVF
-        </h2>
-        <TransactionsTable transactions={recentTransactions} />
-      </section>
-
-      {/* Section 4 — SegmentChart + table */}
-      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-        <h2 className="font-[family-name:var(--font-poppins)] text-lg font-semibold text-[#1B4F72] mb-4">
-          Prix médians par segment (€/m²)
-        </h2>
-        <SegmentChart data={segments} />
-        <div className="overflow-x-auto mt-6">
-          <table className="w-full text-sm min-w-[400px]">
-            <thead>
-              <tr className="bg-[#1B4F72] text-white">
-                <th className="px-4 py-3 text-left font-semibold rounded-tl-lg">Segment</th>
-                <th className="px-4 py-3 text-right font-semibold">Appartement (€/m²)</th>
-                <th className="px-4 py-3 text-right font-semibold">Villa (€/m²)</th>
-                <th className="px-4 py-3 text-right font-semibold rounded-tr-lg">Transactions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {segments.map((s, i) => (
-                <tr key={s.segment} className={i % 2 === 0 ? 'bg-white' : 'bg-[#F5ECD7]'}>
-                  <td className="px-4 py-3 text-[#1B4F72] font-medium">{s.segment}</td>
-                  <td className="px-4 py-3 text-right text-[#5C5C5C]">
-                    {s.apartments > 0 ? s.apartments.toLocaleString('fr-FR') + ' €' : '—'}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[#5C5C5C]">
-                    {s.villas > 0 ? s.villas.toLocaleString('fr-FR') + ' €' : '—'}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[#9B9B9B]">{s.transactionCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Section 5 — Données INSEE */}
-      <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-8">
-        <h2 className="font-[family-name:var(--font-poppins)] text-lg font-semibold text-[#1B4F72] mb-5">
-          Données démographiques — Ajaccio
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <div className="bg-[#D6EEF5] rounded-xl p-4">
-            <p className="text-xs text-[#9B9B9B] mb-1">Population</p>
-            <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">72 000</p>
-            <p className="text-xs text-[#27AE60]">+0,8 % vs national</p>
-          </div>
-          <div className="bg-[#F5ECD7] rounded-xl p-4">
-            <p className="text-xs text-[#9B9B9B] mb-1">Propriétaires</p>
-            <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">49 %</p>
-            <p className="text-xs text-[#C0392B]">−9 % vs national</p>
-          </div>
-          <div className="bg-[#D6EEF5] rounded-xl p-4">
-            <p className="text-xs text-[#9B9B9B] mb-1">Revenu médian</p>
-            <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">22 400 €</p>
-            <p className="text-xs text-[#9B9B9B]">par an</p>
-          </div>
-          <div className="bg-[#F5ECD7] rounded-xl p-4">
-            <p className="text-xs text-[#9B9B9B] mb-1">Résidences secondaires</p>
-            <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">18 %</p>
-            <p className="text-xs text-[#9B9B9B]">du parc total</p>
-          </div>
-        </div>
-        <p className="text-xs text-[#9B9B9B]">
-          Source :{' '}
-          <a
-            href="https://www.insee.fr/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#2E86AB] hover:underline"
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Breadcrumb + date pill */}
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <nav
+            aria-label="Fil d'Ariane"
+            className="text-[13px] text-[#9B9B9B] flex items-center gap-2"
           >
-            données INSEE
-          </a>
-        </p>
-      </section>
+            <Link href="/" className="hover:text-[#2E86AB] transition-colors">
+              Accueil
+            </Link>
+            <span aria-hidden="true">/</span>
+            <Link href="/marche" className="hover:text-[#2E86AB] transition-colors">
+              Marché immobilier
+            </Link>
+            <span aria-hidden="true">/</span>
+            <span className="text-[#1B4F72] font-medium" aria-current="page">
+              Mezzavia {POSTAL_CODE}
+            </span>
+          </nav>
+          <p className="inline-flex items-center gap-2 rounded-full bg-white border border-[#C9A96E]/30 px-3 py-1.5 text-[12px] font-medium text-[#5C5C5C] shadow-sm">
+            <CalendarClock size={14} className="text-[#C9A96E]" aria-hidden="true" />
+            <span>Market data</span>
+          </p>
+        </div>
 
-      {/* Section 6 — Urbanisme accordion */}
-      <section className="mb-8">
-        <h2 className="font-[family-name:var(--font-poppins)] text-lg font-semibold text-[#1B4F72] mb-4">
-          Urbanisme &amp; réglementation
-        </h2>
-        <UrbanismeAccordion items={URBANISME_ITEMS} />
-      </section>
+        {/* Mezzavia / Alata scope warning */}
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl mb-6 text-sm text-[#5C5C5C]">
+          <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
+          <span>
+            <strong className="text-[#1B4F72]">CP 20167 — Périmètre Mezzavia uniquement.</strong>{' '}
+            Cette page présente les données de Mezzavia, quartier de la commune d&apos;Ajaccio
+            (INSEE 2A004). Les transactions d&apos;Alata, commune indépendante partageant ce code
+            postal, sont exclues de toutes les statistiques.
+          </span>
+        </div>
 
-      {/* Section 7 — FiscalMiniSim */}
-      <section className="mb-8">
-        <h2 className="font-[family-name:var(--font-poppins)] text-lg font-semibold text-[#1B4F72] mb-2">
-          Fiscalité
-        </h2>
-        <FiscalMiniSim />
-      </section>
+        {/* ─── HERO + KPI dashboard ────────────────────────────────────── */}
+        <MarketHero
+          postalCode={POSTAL_CODE}
+          zoneTitle={ZONE_LABEL}
+          introSummary={SECTOR.introSummary}
+          aggregates={aggregates}
+        />
 
-      {/* Section 8 — CTA */}
-      <section className="bg-[#1B4F72] rounded-2xl p-8 text-center">
-        <h2 className="font-[family-name:var(--font-poppins)] text-2xl font-bold text-white mb-3">
-          Vous avez un bien à Mezzavia (20167) ?
-        </h2>
-        <p className="text-[#D6EEF5] mb-6 max-w-md mx-auto">
-          Obtenez une estimation gratuite basée sur les données DVF de ce secteur.
-        </p>
-        <Link href="/estimer?cp=20167">
-          <Button variant="prestige" size="lg">
-            Estimer mon bien
-          </Button>
-        </Link>
-      </section>
+        {!aggregates.hasLiveData && (
+          <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            Données DVF live indisponibles pour le moment — les chiffres affichés peuvent être incomplets.
+          </div>
+        )}
+      </div>
+
+      {/* ─── BAND 1 — Présentation secteur (cream bg) ─────────────────── */}
+      <div className="bg-[#FAF5EC]/60 mt-16 py-16 border-y border-[#C9A96E]/10">
+        <div className="max-w-6xl mx-auto px-4 space-y-10">
+          <SectionHeading
+            eyebrow="Comprendre le secteur"
+            title="Mezzavia — un marché périurbain et résidentiel"
+            description="Sept questions essentielles pour cadrer la lecture immobilière de Mezzavia (20167)."
+          />
+          <SectorIntroduction positioning={SECTOR.positioning} />
+        </div>
+      </div>
+
+      {/* ─── BAND 2 — Micro-secteurs (white bg) ───────────────────────── */}
+      <div className="py-16">
+        <div className="max-w-6xl mx-auto px-4 space-y-8">
+          <SectionHeading
+            eyebrow="Micro-secteurs"
+            title="Trois secteurs, trois profils de marché"
+            description="Bourg, résidentiel diffus, collines — chaque secteur répond à des logiques différentes."
+          />
+          <MicroSectorsTable sectors={SECTOR.microSectors} />
+        </div>
+      </div>
+
+      {/* ─── BAND 3 — Tendances chiffrées (cream bg) ──────────────────── */}
+      <div className="bg-[#FAF5EC]/60 py-16 border-y border-[#C9A96E]/10">
+        <div className="max-w-6xl mx-auto px-4 space-y-10">
+          <SectionHeading
+            eyebrow="Tendances DVF"
+            title="L'évolution des prix mois après mois, année après année"
+            description="Médianes calculées en direct sur les données DVF filtrées Mezzavia (INSEE 2A004). Volumes faibles : interpréter avec prudence."
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <article className="bg-white rounded-2xl p-6 md:p-7 shadow-sm border border-gray-100">
+              <header className="mb-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#2E86AB] mb-2">
+                  24 mois
+                </p>
+                <h3 className="font-[family-name:var(--font-poppins)] text-lg md:text-xl font-bold text-[#1B4F72]">
+                  Évolution mensuelle
+                </h3>
+                <p className="text-sm text-[#9B9B9B] mt-1">
+                  Médiane mensuelle des ventes d&apos;appartements.
+                </p>
+              </header>
+              {monthlyChartData.length > 1 ? (
+                <PriceChart data={monthlyChartData} />
+              ) : (
+                <p className="text-sm text-[#9B9B9B] py-12 text-center">
+                  Volume mensuel insuffisant pour afficher une courbe fiable.
+                </p>
+              )}
+            </article>
+
+            <article className="bg-white rounded-2xl p-6 md:p-7 shadow-sm border border-gray-100">
+              <header className="mb-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#C9A96E] mb-2">
+                  6 ans
+                </p>
+                <h3 className="font-[family-name:var(--font-poppins)] text-lg md:text-xl font-bold text-[#1B4F72]">
+                  Tendance pluriannuelle
+                </h3>
+                <p className="text-sm text-[#9B9B9B] mt-1">
+                  Médiane annuelle après trim P25–P75.
+                </p>
+              </header>
+              <YearlyEvolutionChart data={yearly.series} />
+              <p className="text-[11px] italic text-[#9B9B9B] mt-3 leading-relaxed">
+                Volumes faibles à Mezzavia — courbe à interpréter avec prudence.
+              </p>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── CTA TOP ───────────────────────────────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-4 mt-16">
+        <MarketCTA variant="top" postalCode={POSTAL_CODE} />
+      </div>
+
+      {/* ─── BAND 4 — Typologies + profils acheteurs ──────────────────── */}
+      <div className="py-16">
+        <div className="max-w-6xl mx-auto px-4 space-y-12">
+          <div className="space-y-8">
+            <SectionHeading
+              eyebrow="Prix par typologie"
+              title="Appartements et maisons : combien valent-ils à Mezzavia ?"
+              description="Médianes DVF sur 5 ans glissants, filtrées Mezzavia uniquement (INSEE 2A004)."
+            />
+            <TypologyPriceTable typology={typology} />
+          </div>
+
+          <div className="space-y-8">
+            <SectionHeading
+              eyebrow="Qui achète ici"
+              title="Six profils acheteurs et leurs critères-clés"
+              description="Vendre, c'est cibler. Chaque profil regarde des critères différents — voici les vôtres."
+            />
+            <BuyerProfilesTable profiles={SECTOR.buyerProfiles} />
+          </div>
+        </div>
+      </div>
+
+      {/* ─── CTA MIDDLE ────────────────────────────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-4">
+        <MarketCTA variant="middle" postalCode={POSTAL_CODE} />
+      </div>
+
+      {/* ─── BAND 5 — Facteurs valo / décote (cream bg) ──────────────── */}
+      <div className="bg-[#FAF5EC]/60 mt-16 py-16 border-y border-[#C9A96E]/10">
+        <div className="max-w-6xl mx-auto px-4 space-y-10">
+          <SectionHeading
+            eyebrow="Critères qui font le prix"
+            title="Ce qui valorise — ce qui pénalise"
+            description="À Mezzavia, les critères spécifiques aux maisons individuelles dominent la valeur."
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <FactorsGrid
+              tone="positive"
+              title="Critères qui valorisent"
+              description="Ce qui fait monter le prix à Mezzavia"
+              factors={SECTOR.valuationFactors}
+            />
+            <FactorsGrid
+              tone="negative"
+              title="Critères qui pénalisent"
+              description="Les freins identifiés sur ce secteur"
+              factors={SECTOR.discountFactors}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ─── BAND 6 — Carte + transactions (white bg) ─────────────────── */}
+      <div className="py-16">
+        <div className="max-w-6xl mx-auto px-4 space-y-10">
+          <SectionHeading
+            eyebrow="Cartographie DVF"
+            title="Les ventes récentes à Mezzavia, vue par vue"
+            description="Chaque cercle est une vente DVF des 24 derniers mois — exclusivement Mezzavia (Ajaccio INSEE 2A004)."
+          />
+          <DvfSalesMapClient transactions={transactions.rows} postalCode={POSTAL_CODE} />
+
+          <article className="bg-white rounded-2xl p-6 md:p-7 shadow-sm border border-gray-100 mt-2">
+            <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#2E86AB] mb-1">
+                  Détail des transactions · 24 mois · Mezzavia uniquement
+                </p>
+                <h3 className="font-[family-name:var(--font-poppins)] text-lg md:text-xl font-bold text-[#1B4F72]">
+                  Dernières transactions DVF
+                </h3>
+                <p className="text-sm text-[#9B9B9B] mt-1">
+                  Adresses partielles publiées par l&apos;État — données officielles, vie privée préservée.
+                </p>
+              </div>
+              <p className="inline-flex items-center gap-2 rounded-full bg-[#FAF5EC] border border-[#C9A96E]/20 px-3 py-1.5 text-[12px] font-medium text-[#5C5C5C] shrink-0">
+                <CalendarClock size={14} className="text-[#C9A96E]" aria-hidden="true" />
+                <span>
+                  Mise à jour{' '}
+                  <time dateTime={DVF_LAST_UPDATE} className="text-[#1B4F72] font-semibold">
+                    {DVF_LAST_UPDATE_LABEL}
+                  </time>
+                </span>
+              </p>
+            </header>
+            <LiveTransactionsTable transactions={transactions.rows} limit={12} />
+          </article>
+        </div>
+      </div>
+
+      {/* ─── BAND 7 — Démographie (cream bg) ──────────────────────────── */}
+      <div className="bg-[#FAF5EC]/60 py-16 border-y border-[#C9A96E]/10">
+        <div className="max-w-6xl mx-auto px-4 space-y-12">
+          <div className="space-y-8">
+            <SectionHeading
+              eyebrow="Cadre territorial"
+              title="Démographie d'Ajaccio — le contexte qui pèse sur les prix"
+              description="Mezzavia est un quartier d'Ajaccio. Les données démographiques reflètent la commune dans son ensemble."
+            />
+
+            <article className="bg-white rounded-2xl p-6 md:p-7 shadow-sm border border-gray-100">
+              <h3 className="font-[family-name:var(--font-poppins)] text-lg font-bold text-[#1B4F72] mb-5">
+                Données démographiques — Ajaccio
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="bg-[#D6EEF5] rounded-xl p-4">
+                  <p className="text-[10px] text-[#9B9B9B] uppercase tracking-wider font-bold mb-1">Population</p>
+                  <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">72 000</p>
+                  <p className="text-xs text-[#1e8449] font-medium">+0,8 % vs national</p>
+                </div>
+                <div className="bg-[#F5ECD7] rounded-xl p-4">
+                  <p className="text-[10px] text-[#9B9B9B] uppercase tracking-wider font-bold mb-1">Propriétaires</p>
+                  <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">49 %</p>
+                  <p className="text-xs text-[#C0392B] font-medium">−9 % vs national</p>
+                </div>
+                <div className="bg-[#D6EEF5] rounded-xl p-4">
+                  <p className="text-[10px] text-[#9B9B9B] uppercase tracking-wider font-bold mb-1">Revenu médian</p>
+                  <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">22 400 €</p>
+                  <p className="text-xs text-[#9B9B9B]">par an</p>
+                </div>
+                <div className="bg-[#F5ECD7] rounded-xl p-4">
+                  <p className="text-[10px] text-[#9B9B9B] uppercase tracking-wider font-bold mb-1">Résidences sec.</p>
+                  <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-xl">18 %</p>
+                  <p className="text-xs text-[#9B9B9B]">du parc total</p>
+                </div>
+              </div>
+              <p className="text-xs text-[#9B9B9B]">
+                Source :{' '}
+                <a
+                  href="https://www.insee.fr/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#2E86AB] hover:underline font-medium"
+                >
+                  données INSEE
+                </a>
+              </p>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── BAND 8 — Conseils vendeurs (white bg) ────────────────────── */}
+      <div className="py-16">
+        <div className="max-w-6xl mx-auto px-4 space-y-8">
+          <SectionHeading
+            eyebrow="Méthode"
+            title="Vendre au juste prix à Mezzavia — les 5 points clés"
+            description="Un marché moins liquide demande une préparation plus rigoureuse."
+            tone="gold"
+          />
+          <SellerAdvice advice={SECTOR.sellerAdvice} />
+        </div>
+      </div>
+
+      {/* ─── BAND 9 — FAQ (cream bg) ──────────────────────────────────── */}
+      <div className="bg-[#FAF5EC]/60 py-16 border-y border-[#C9A96E]/10">
+        <div className="max-w-6xl mx-auto px-4 space-y-8">
+          <SectionHeading
+            eyebrow="Questions fréquentes"
+            title="Tout ce qu'on nous demande sur le 20167"
+            description="Réponses concises, non commerciales, basées sur le terrain."
+          />
+          <FaqAccordion items={SECTOR.faq} />
+        </div>
+      </div>
+
+      {/* ─── CTA BOTTOM ────────────────────────────────────────────────── */}
+      <div className="max-w-6xl mx-auto px-4 mt-16">
+        <MarketCTA variant="bottom" postalCode={POSTAL_CODE} zone="Mezzavia" />
+      </div>
+
+      {/* ─── Maillage interne ───────────────────────────────────────────── */}
+      <nav
+        aria-label="Autres secteurs d'Ajaccio"
+        className="max-w-6xl mx-auto px-4 mt-16 pt-12 border-t border-gray-200"
+      >
+        <SectionHeading
+          eyebrow="Continuer l'exploration"
+          title="Découvrir les autres secteurs d'Ajaccio"
+          align="center"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+          <Link
+            href="/marche/20000"
+            className="group rounded-2xl bg-white border border-gray-100 hover:border-[#2E86AB] hover:shadow-lg hover:-translate-y-0.5 p-6 transition-all"
+          >
+            <Badge variant="apartment" size="sm">20000</Badge>
+            <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-lg mt-3">
+              Ajaccio centre
+            </p>
+            <p className="text-sm text-[#9B9B9B] mt-1.5 leading-relaxed">
+              Centre historique, cours Napoléon, Trottel, Sanguinaires.
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#2E86AB] mt-4 group-hover:gap-2 transition-all">
+              Voir le marché 20000 <ArrowRight size={14} />
+            </span>
+          </Link>
+          <Link
+            href="/marche/20090"
+            className="group rounded-2xl bg-white border border-gray-100 hover:border-[#2E86AB] hover:shadow-lg hover:-translate-y-0.5 p-6 transition-all"
+          >
+            <Badge variant="apartment" size="sm">20090</Badge>
+            <p className="font-[family-name:var(--font-poppins)] font-bold text-[#1B4F72] text-lg mt-3">
+              Ajaccio sud
+            </p>
+            <p className="text-sm text-[#9B9B9B] mt-1.5 leading-relaxed">
+              Aspretto, Campo dell&apos;Oro, Les Cannes, Saint-Joseph, Pietrina.
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#2E86AB] mt-4 group-hover:gap-2 transition-all">
+              Voir le marché 20090 <ArrowRight size={14} />
+            </span>
+          </Link>
+          <Link
+            href="/marche"
+            className="group rounded-2xl bg-gradient-to-br from-[#1B4F72] to-[#2E86AB] text-white hover:shadow-lg hover:-translate-y-0.5 p-6 transition-all"
+          >
+            <Badge variant="prestige" size="sm">Vue globale</Badge>
+            <p className="font-[family-name:var(--font-poppins)] font-bold text-white text-lg mt-3">
+              Tout le marché Ajaccio
+            </p>
+            <p className="text-sm text-white/80 mt-1.5 leading-relaxed">
+              Comparaison des trois codes postaux et synthèse globale.
+            </p>
+            <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#C9A96E] mt-4 group-hover:gap-2 transition-all">
+              Voir la page pilier <ArrowRight size={14} />
+            </span>
+          </Link>
+        </div>
+      </nav>
     </main>
   )
 }

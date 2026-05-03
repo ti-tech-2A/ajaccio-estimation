@@ -16,7 +16,17 @@ interface StepperProps {
   optional?: boolean
 }
 
+function labelToId(label: string): string {
+  return label
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 function Stepper({ label, value, onChange, min, max, step = 1, unit, optional }: StepperProps) {
+  const inputId = labelToId(label)
   const current = value ?? min
   const [localValue, setLocalValue] = useState<string>(current.toString())
 
@@ -68,12 +78,15 @@ function Stepper({ label, value, onChange, min, max, step = 1, unit, optional }:
 
   return (
     <div className="flex items-center justify-between py-4 border-b border-gray-100 last:border-0 gap-2">
-      <span className="text-sm font-[family-name:var(--font-open-sans)] text-[#5C5C5C] font-medium leading-tight">
+      <label
+        htmlFor={inputId}
+        className="text-sm font-[family-name:var(--font-open-sans)] text-[#5C5C5C] font-medium leading-tight cursor-default"
+      >
         {label}
         {optional && (
           <span className="ml-1 text-[#9B9B9B] font-normal text-xs whitespace-nowrap">(optionnel)</span>
         )}
-      </span>
+      </label>
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <button
           type="button"
@@ -87,6 +100,7 @@ function Stepper({ label, value, onChange, min, max, step = 1, unit, optional }:
         
         <div className="flex items-baseline justify-center min-w-[3.5rem] sm:min-w-[4rem] group relative">
           <input
+            id={inputId}
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"

@@ -197,49 +197,6 @@ function MapViewportSync() {
   return null
 }
 
-function MapInfoBar({ sectionCount }: { sectionCount: number }) {
-  const zones: { key: PostalZone; name: string; fill: string }[] = [
-    { key: 'centre', name: ZONE_COLORS.centre.name, fill: ZONE_COLORS.centre.fill },
-    { key: 'sud', name: ZONE_COLORS.sud.name, fill: ZONE_COLORS.sud.fill },
-    { key: 'mezzavia', name: ZONE_COLORS.mezzavia.name, fill: ZONE_COLORS.mezzavia.fill },
-  ]
-
-  return (
-    <div className="pointer-events-none absolute inset-x-2 bottom-2 z-[820] sm:inset-x-4 sm:bottom-3">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-[12px] border border-white/14 bg-[#071523]/82 px-3 py-2 shadow-[0_12px_32px_-18px_rgba(0,0,0,0.95)] backdrop-blur-xl">
-        <span className="text-[0.58rem] font-extrabold uppercase tracking-[0.2em] text-[#F0C77B]">
-          Cadastre 2A004
-        </span>
-        <span className="h-3 w-px bg-white/16" aria-hidden="true" />
-        <span className="flex items-center gap-2">
-          {zones.map((zone) => (
-            <span key={zone.key} className="flex items-center gap-1">
-              <span
-                className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                style={{ backgroundColor: zone.fill }}
-                aria-hidden="true"
-              />
-              <span className="text-[0.5rem] font-semibold uppercase tracking-[0.1em] text-white/60">
-                {zone.name}
-              </span>
-            </span>
-          ))}
-        </span>
-        {sectionCount > 0 && (
-          <>
-            <span className="h-3 w-px bg-white/16" aria-hidden="true" />
-            <span className="text-[0.5rem] font-semibold text-white/55">
-              {sectionCount} sections
-            </span>
-          </>
-        )}
-        <span className="ml-auto hidden text-[0.44rem] font-medium text-white/36 sm:inline">
-          Esri imagery · Cadastre Etalab · INSEE RP2022
-        </span>
-      </div>
-    </div>
-  )
-}
 
 function LoadingSkeleton() {
   return (
@@ -501,7 +458,17 @@ export default function CoverageMap() {
         <div className="pointer-events-none absolute inset-x-0 top-0 z-[700] h-28 bg-gradient-to-b from-[#071523]/62 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[700] h-24 bg-gradient-to-t from-[#071523]/58 to-transparent" />
 
-        <MapInfoBar sectionCount={geoData?.features.length ?? 0} />
+        <div className="pointer-events-none absolute inset-x-3 top-3 z-[820] sm:inset-x-4 sm:top-4">
+          <div className="inline-flex items-center gap-2 rounded-[10px] border border-white/14 bg-[#071523]/82 px-3 py-1.5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+            <span className="text-[0.56rem] font-extrabold uppercase tracking-[0.18em] text-[#F0C77B]">
+              Vue Satellite HD
+            </span>
+            <span className="h-2.5 w-px bg-white/20" aria-hidden="true" />
+            <span className="text-[0.56rem] font-semibold uppercase tracking-[0.14em] text-white/70">
+              Sections Cadastrales Ajaccio
+            </span>
+          </div>
+        </div>
 
         {!geoData && !error && <LoadingSkeleton />}
         {error && (

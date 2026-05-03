@@ -60,7 +60,7 @@ export default function ProblemSection() {
             comme une moyenne nationale
           </h2>
           <p className="mt-5 max-w-md text-sm leading-relaxed text-[#4A5568]">
-            Entre la route des Sanguinaires, le centre et les zones sud, les amplitudes de prix
+            Entre la route des Sanguinaires, le cours Napoléon, le secteur de Binda ou des Salines, les amplitudes de prix
             sont fortes. Une valuation premium doit donc raisonner à l&apos;échelle micro-locale.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3 text-xs font-medium text-[#0F2A4A]/75">

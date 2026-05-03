@@ -15,6 +15,30 @@ import type { WizardFormData, EstimationResult as EstimationResultType } from '@
 
 const SESSION_KEY = 'estimation_wizard_data'
 
+function EstimationSkeleton() {
+  return (
+    <div className="animate-pulse py-4" role="status" aria-label="Calcul de l'estimation en cours">
+      <div className="text-center mb-8 space-y-3">
+        <div className="h-3 rounded-full bg-gray-200 w-40 mx-auto" />
+        <div className="h-10 rounded-lg bg-gray-200 w-4/5 mx-auto" />
+        <div className="h-7 rounded-full bg-gray-200 w-28 mx-auto" />
+      </div>
+      <div className="rounded-xl bg-gray-100 p-4 mb-6 space-y-2.5">
+        <div className="h-3 rounded-full bg-gray-200 w-3/4" />
+        <div className="h-3 rounded-full bg-gray-200 w-1/2" />
+      </div>
+      <div className="space-y-2 mb-8">
+        <div className="h-3 rounded-full bg-gray-200 w-full" />
+        <div className="h-3 rounded-full bg-gray-200 w-5/6" />
+      </div>
+      <div className="flex flex-wrap gap-3">
+        <div className="h-11 rounded-xl bg-gray-200 flex-1" />
+        <div className="h-11 rounded-xl bg-gray-200 flex-1" />
+      </div>
+    </div>
+  )
+}
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE_REGEX = /^(\+33|0)[67]\d{8}$/
 
@@ -65,6 +89,7 @@ function WizardContent() {
   const [callbackData, setCallbackData] = useState({ name: '', phone: '', message: '' })
   const [callbackSubmitted, setCallbackSubmitted] = useState(false)
   const [callbackLoading, setCallbackLoading] = useState(false)
+  const [callbackError, setCallbackError] = useState<string | null>(null)
 
   // Restore from sessionStorage on mount
   useEffect(() => {
@@ -195,8 +220,9 @@ function WizardContent() {
   async function handleCallbackSubmit(e: React.FormEvent) {
     e.preventDefault()
     setCallbackLoading(true)
+    setCallbackError(null)
     try {
-      await fetch('/api/contact', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -206,10 +232,10 @@ function WizardContent() {
           source_page: '/estimer',
         }),
       })
+      if (!res.ok) throw new Error('API error')
       setCallbackSubmitted(true)
     } catch {
-      // Silently handle — show success anyway (optimistic)
-      setCallbackSubmitted(true)
+      setCallbackError('Une erreur est survenue. Veuillez réessayer.')
     } finally {
       setCallbackLoading(false)
     }
@@ -286,7 +312,14 @@ function WizardContent() {
                 <EstimationResult
                   result={result}
                   postalCode={formData.postalCode ?? '20000'}
-                  onRequestCallback={() => setShowCallbackForm(true)}
+                  onRequestCallback={() => {
+                    setCallbackData((p) => ({
+                      ...p,
+                      name: formData.fullName ?? '',
+                      phone: formData.phone ?? '',
+                    }))
+                    setShowCallbackForm(true)
+                  }}
                 />
 
                 {/* Callback accordion */}
@@ -333,10 +366,11 @@ function WizardContent() {
                                 Être rappelé par notre expert
                               </h3>
                               <div>
-                                <label className="block text-sm font-semibold text-[#1B4F72] mb-1">
+                                <label htmlFor="callback-name" className="block text-sm font-semibold text-[#1B4F72] mb-1">
                                   Votre nom
                                 </label>
                                 <input
+                                  id="callback-name"
                                   type="text"
                                   value={callbackData.name}
                                   onChange={(e) => setCallbackData((p) => ({ ...p, name: e.target.value }))}
@@ -346,10 +380,11 @@ function WizardContent() {
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm font-semibold text-[#1B4F72] mb-1">
+                                <label htmlFor="callback-phone" className="block text-sm font-semibold text-[#1B4F72] mb-1">
                                   Votre téléphone
                                 </label>
                                 <input
+                                  id="callback-phone"
                                   type="tel"
                                   value={callbackData.phone}
                                   onChange={(e) => setCallbackData((p) => ({ ...p, phone: e.target.value }))}
@@ -359,11 +394,12 @@ function WizardContent() {
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm font-semibold text-[#1B4F72] mb-1">
+                                <label htmlFor="callback-message" className="block text-sm font-semibold text-[#1B4F72] mb-1">
                                   Message{' '}
                                   <span className="text-[#9B9B9B] font-normal">(optionnel)</span>
                                 </label>
                                 <textarea
+                                  id="callback-message"
                                   value={callbackData.message}
                                   onChange={(e) => setCallbackData((p) => ({ ...p, message: e.target.value }))}
                                   placeholder="Précisez votre demande..."
@@ -374,6 +410,11 @@ function WizardContent() {
                               <Button variant="prestige" type="submit" loading={callbackLoading}>
                                 Envoyer ma demande
                               </Button>
+                              {callbackError && (
+                                <p role="alert" className="text-xs text-[#C0392B] text-center">
+                                  {callbackError}
+                                </p>
+                              )}
                             </motion.form>
                           )}
                         </AnimatePresence>
@@ -381,6 +422,16 @@ function WizardContent() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+              </motion.div>
+            ) : isLoading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <EstimationSkeleton />
               </motion.div>
             ) : (
               <motion.div
