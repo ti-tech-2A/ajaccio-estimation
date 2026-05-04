@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 const WP_BASE = 'https://vendreencorse.com/wp-json/wp/v2'
 const TAG_ID = 186
 
-export const revalidate = 86400
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
