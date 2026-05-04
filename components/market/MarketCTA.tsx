@@ -59,9 +59,17 @@ const COPY: Record<CTAVariant, {
   },
 }
 
+const DURATION_BY_CP: Record<string, string> = {
+  '20090': '3 minutes',
+}
+
 export function MarketCTA({ variant, postalCode, zone }: MarketCTAProps) {
   const c = COPY[variant]
   const href = `/estimer?cp=${postalCode}`
+  const title =
+    variant === 'top' && DURATION_BY_CP[postalCode]
+      ? c.title.replace('2 minutes', DURATION_BY_CP[postalCode])
+      : c.title
 
   return (
     <section
@@ -94,7 +102,7 @@ export function MarketCTA({ variant, postalCode, zone }: MarketCTAProps) {
             <h2
               className={`font-[family-name:var(--font-poppins)] text-xl md:text-2xl font-bold ${c.textColor}`}
             >
-              {c.title}
+              {title}
               {zone ? <span className="text-base font-normal opacity-80"> — {zone}</span> : null}
             </h2>
             <p
