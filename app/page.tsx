@@ -9,6 +9,7 @@ import Differentiators from '@/components/home/Differentiators'
 import Testimonials from '@/components/home/Testimonials'
 import PhotoGrid from '@/components/home/PhotoGrid'
 import Coverage from '@/components/home/Coverage'
+import ArticlesVendreEnCorse from '@/components/home/ArticlesVendreEnCorse'
 import FaqAccordion from '@/components/home/FaqAccordion'
 import CtaFinal from '@/components/home/CtaFinal'
 import JsonLd from '@/components/home/JsonLd'
@@ -100,6 +101,7 @@ export default async function HomePage() {
         <Testimonials />
         <PhotoGrid />
         <Coverage />
+        <ArticlesVendreEnCorse />
         <FaqAccordion />
         <CtaFinal />
       </main>
