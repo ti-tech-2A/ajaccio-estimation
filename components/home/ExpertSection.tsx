@@ -20,7 +20,7 @@ const EXPERT_POINTS = [
 
 const EXPERT_METRICS: ExpertMetric[] = [
   { value: '25 ans', label: "D'expérience locale" },
-  { value: '147+', label: 'Dossiers accompagnés' },
+  { value: '300+', label: 'Biens estimés' },
   { value: '< 24h', label: 'Délai de rappel moyen' },
 ]
 

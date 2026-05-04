@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 const MESSAGES = [
   'Données DVF actualisées au 1er mai 2026 — Prix au m² par secteur',
   'Estimation gratuite en 3 minutes — Sans engagement, résultat immédiat',
-  'Mandataire Safti à Ajaccio depuis 25 ans — 147 dossiers réalisés',
+  'Mandataire Safti à Ajaccio depuis 25 ans — 300+ biens estimés',
 ]
 
 const STORAGE_KEY = 'announcement_bar_dismissed'
