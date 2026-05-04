@@ -13,21 +13,31 @@ const fadeInUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as const } },
 }
 
-// 4 color pairs from site palette, consistent per category name
-const CATEGORY_PALETTE = [
-  { bg: '#FBF5E9', text: '#9A7A3E' }, // gold warm
-  { bg: '#E8EDF4', text: '#0F2A4A' }, // navy
-  { bg: '#E8F4EE', text: '#1A8754' }, // green
-  { bg: '#EDE8DE', text: '#5E6E7E' }, // beige-gray
+const NAMED_COLORS: Record<string, { bg: string; text: string }> = {
+  'Marché Immobilier':      { bg: '#C9A96E', text: '#0F2A4A' },
+  'Fiscalité & Patrimoine': { bg: '#0F2A4A', text: '#ffffff' },
+  'Vendre Intelligemment':  { bg: '#5E6E7E', text: '#ffffff' },
+  'Analyses':               { bg: '#EDE8DE', text: '#0F2A4A' },
+  'Conseils':               { bg: '#E8EDF4', text: '#0F2A4A' },
+}
+
+const FALLBACK_PALETTE = [
+  { bg: '#C9A96E', text: '#0F2A4A' },
+  { bg: '#0F2A4A', text: '#ffffff' },
+  { bg: '#5E6E7E', text: '#ffffff' },
+  { bg: '#EDE8DE', text: '#0F2A4A' },
 ] as const
 
-function categoryColor(name: string) {
+function categoryColor(name: string): { bg: string; text: string } {
+  if (NAMED_COLORS[name]) return NAMED_COLORS[name]
   let hash = 0
   for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0
-  return CATEGORY_PALETTE[hash % CATEGORY_PALETTE.length]
+  return FALLBACK_PALETTE[hash % FALLBACK_PALETTE.length]
 }
 
 export default function ArticleCard({ article }: ArticleCardProps) {
+  const color = article.category ? categoryColor(article.category) : null
+
   return (
     <motion.a
       variants={fadeInUp}
@@ -36,6 +46,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       rel="noopener"
       className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-[#EDE8DE] shadow-[0_8px_24px_-12px_rgba(15,42,74,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_-16px_rgba(15,42,74,0.28)]"
     >
+      {/* Image + category overlay */}
       <div className="relative aspect-[16/10] overflow-hidden bg-[#EDE8DE]">
         {article.image ? (
           <Image
@@ -48,48 +59,37 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#0F2A4A] to-[#1a3a5e]" aria-hidden="true" />
         )}
+
+        {color && article.category && (
+          <span
+            className="absolute bottom-3 left-3 rounded-full px-3 py-1 font-[family-name:var(--font-dm-sans)] font-semibold backdrop-blur-sm"
+            style={{
+              backgroundColor: color.bg,
+              color: color.text,
+              fontSize: '11px',
+              letterSpacing: '0.04em',
+              opacity: 0.95,
+            }}
+          >
+            {article.category}
+          </span>
+        )}
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        {article.category && (() => {
-          const { bg, text } = categoryColor(article.category)
-          return (
-            <span
-              className="self-start rounded-full px-2.5 py-0.5 font-[family-name:var(--font-dm-sans)] font-semibold"
-              style={{ backgroundColor: bg, color: text, fontSize: '11px', letterSpacing: '0.03em' }}
-            >
-              {article.category}
-            </span>
-          )
-        })()}
+      {/* Title only */}
+      <div className="flex flex-1 flex-col p-5">
         <h3
           className="line-clamp-3 text-[#0F2A4A] group-hover:text-[#1a3a5e]"
           style={{
             fontFamily: 'var(--font-poppins)',
-            fontSize: '1.0625rem',
+            fontSize: '1rem',
             fontWeight: 600,
-            lineHeight: 1.35,
+            lineHeight: 1.4,
             letterSpacing: '-0.01em',
           }}
         >
           {article.title}
         </h3>
-
-        <div className="mt-auto flex items-center gap-2 pt-2">
-          <span
-            className="flex h-6 w-6 items-center justify-center rounded-full bg-[#1A8754] text-white"
-            style={{ fontFamily: 'var(--font-poppins)', fontSize: '10px', fontWeight: 700, letterSpacing: '0.02em' }}
-            aria-hidden="true"
-          >
-            VEC
-          </span>
-          <span
-            className="text-[#4A5568] font-[family-name:var(--font-dm-sans)] font-medium"
-            style={{ fontSize: '12px' }}
-          >
-            Vendre En Corse
-          </span>
-        </div>
       </div>
     </motion.a>
   )
