@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { motion } from 'framer-motion'
 import ArticleCard from '@/components/articles/ArticleCard'
 import type { ArticleTeaser, WPPost } from '@/types/wp'
 
@@ -56,8 +55,6 @@ function toTeaser(post: WPPost): ArticleTeaser {
 
 export default function ArticlesVendreEnCorse() {
   const [articles, setArticles] = useState<ArticleTeaser[] | null>(null)
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, amount: 0.15 })
 
   useEffect(() => {
     fetch('/api/wp-articles?limit=4')
@@ -135,10 +132,9 @@ export default function ArticlesVendreEnCorse() {
           </div>
         ) : (
           <motion.div
-            ref={ref}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
             initial="hidden"
-            animate={inView ? 'visible' : 'hidden'}
+            animate="visible"
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
           >
             {articles.map((article) => (
