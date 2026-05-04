@@ -46,7 +46,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       rel="noopener"
       className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-[#EDE8DE] shadow-[0_8px_24px_-12px_rgba(15,42,74,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_36px_-16px_rgba(15,42,74,0.28)]"
     >
-      {/* Image + category overlay */}
+      {/* Image */}
       <div className="relative aspect-[16/10] overflow-hidden bg-[#EDE8DE]">
         {article.image ? (
           <Image
@@ -59,25 +59,10 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#0F2A4A] to-[#1a3a5e]" aria-hidden="true" />
         )}
-
-        {color && article.category && (
-          <span
-            className="absolute bottom-3 left-3 rounded-full px-3 py-1 font-[family-name:var(--font-dm-sans)] font-semibold backdrop-blur-sm"
-            style={{
-              backgroundColor: color.bg,
-              color: color.text,
-              fontSize: '11px',
-              letterSpacing: '0.04em',
-              opacity: 0.95,
-            }}
-          >
-            {article.category}
-          </span>
-        )}
       </div>
 
-      {/* Title only */}
-      <div className="flex flex-1 flex-col p-5">
+      {/* Title + VEC tag below */}
+      <div className="flex flex-1 flex-col p-5 gap-3">
         <h3
           className="line-clamp-3 text-[#0F2A4A] group-hover:text-[#1a3a5e]"
           style={{
@@ -90,6 +75,32 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         >
           {article.title}
         </h3>
+
+        {color && article.category && (
+          <div className="mt-auto flex items-center gap-2">
+            <span
+              className="rounded px-1.5 py-0.5 font-[family-name:var(--font-poppins)] font-bold"
+              style={{
+                backgroundColor: color.bg,
+                color: color.text,
+                fontSize: '9px',
+                letterSpacing: '0.06em',
+              }}
+            >
+              VEC
+            </span>
+            <span
+              className="font-[family-name:var(--font-dm-sans)] font-medium"
+              style={{
+                color: color.bg,
+                fontSize: '11px',
+                letterSpacing: '0.02em',
+              }}
+            >
+              {article.category}
+            </span>
+          </div>
+        )}
       </div>
     </motion.a>
   )
