@@ -90,7 +90,7 @@ export default function ArticlesVendreEnCorse() {
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
         <div className="mb-12">
           <p className="text-[#C9A96E] text-sm tracking-[0.15em] uppercase font-semibold mb-3">
-            Lectures recommandées
+            Vendre En Corse
           </p>
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
             <h2
@@ -103,7 +103,7 @@ export default function ArticlesVendreEnCorse() {
                 lineHeight: 1.2,
               }}
             >
-              À lire aussi sur le marché immobilier ajaccien
+              Décryptages du marché immobilier ajaccien
             </h2>
             <a
               href={VEC_HOMEPAGE}
