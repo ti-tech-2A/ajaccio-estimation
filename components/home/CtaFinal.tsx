@@ -10,7 +10,7 @@ import { fadeUp, staggerContainer } from '@/lib/motion'
 const BENEFITS = [
   {
     title: 'Conseils personnalisés gratuits',
-    text: 'Un mandataire local Ajaccio analyse votre bien et vous guide pour vendre, louer ou estimer au meilleur prix — sans engagement.',
+    text: 'Un conseiller immobilier local Ajaccio analyse votre bien et vous guide pour vendre, louer ou estimer au meilleur prix — sans engagement.',
   },
   {
     title: 'Expertise du marché corse',
