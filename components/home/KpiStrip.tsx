@@ -4,6 +4,7 @@ import { useId, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useCountUp } from '@/lib/hooks/useCountUp'
 import { fadeUp, staggerContainer } from '@/lib/motion'
+import { DVF_LAST_UPDATE, DVF_LAST_UPDATE_LABEL } from '@/lib/constants'
 import type { HomeKpiMetric } from '@/lib/server/market-signal'
 
 interface KpiStripProps {
@@ -101,10 +102,25 @@ export default function KpiStrip({ metrics, sourceLabel }: KpiStripProps) {
           <p className="mt-4 text-xs text-white/55">{sourceLabel}</p>
         </motion.div>
 
-        <motion.div variants={fadeUp} className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {metrics.map((kpi) => (
-            <KpiItem key={kpi.label} {...kpi} />
-          ))}
+        <motion.div variants={fadeUp} className="flex flex-col gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {metrics.map((kpi) => (
+              <KpiItem key={kpi.label} {...kpi} />
+            ))}
+          </div>
+
+          <div className="flex items-center justify-center gap-2.5 pt-2" role="status" aria-live="polite">
+            <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#27AE60] opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#27AE60]" />
+            </span>
+            <span className="text-[0.7rem] font-medium uppercase tracking-[0.18em] text-white/55">
+              Données actualisées au{' '}
+              <time dateTime={DVF_LAST_UPDATE} className="text-white/80">
+                {DVF_LAST_UPDATE_LABEL}
+              </time>
+            </span>
+          </div>
         </motion.div>
       </motion.div>
     </section>
