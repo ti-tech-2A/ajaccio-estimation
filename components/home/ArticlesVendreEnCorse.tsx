@@ -55,7 +55,7 @@ function toTeaser(post: WPPost): ArticleTeaser {
 }
 
 export default function ArticlesVendreEnCorse() {
-  const [articles, setArticles] = useState<ArticleTeaser[]>([])
+  const [articles, setArticles] = useState<ArticleTeaser[] | null>(null)
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.15 })
 
@@ -63,14 +63,15 @@ export default function ArticlesVendreEnCorse() {
     fetch('/api/wp-articles?limit=4')
       .then((r) => r.json())
       .then((data: WPPost[]) => {
-        if (Array.isArray(data) && data.length > 0) setArticles(data.map(toTeaser))
+        setArticles(Array.isArray(data) && data.length > 0 ? data.map(toTeaser) : [])
       })
-      .catch(() => {})
+      .catch(() => setArticles([]))
   }, [])
 
-  if (articles.length === 0) return null
+  // null = loading, [] = failed, [...] = success
+  if (articles !== null && articles.length === 0) return null
 
-  const itemListSchema = {
+  const itemListSchema = articles ? {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     itemListElement: articles.map((a, i) => ({
@@ -79,14 +80,16 @@ export default function ArticlesVendreEnCorse() {
       url: a.link,
       name: a.title,
     })),
-  }
+  } : null
 
   return (
     <section className="bg-white py-24">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
-      />
+      {itemListSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+        />
+      )}
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
         <div className="mb-12">
           <p className="text-[#C9A96E] text-sm tracking-[0.15em] uppercase font-semibold mb-3">
@@ -117,17 +120,32 @@ export default function ArticlesVendreEnCorse() {
           </div>
         </div>
 
-        <motion.div
-          ref={ref}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
-          initial="hidden"
-          animate={inView ? 'visible' : 'hidden'}
-          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
-        >
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
-        </motion.div>
+        {articles === null ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="rounded-2xl bg-[#EDE8DE] border border-[#E5DDD0] overflow-hidden animate-pulse">
+                <div className="aspect-[16/10] bg-[#D8D0C4]" />
+                <div className="p-5 flex flex-col gap-3">
+                  <div className="h-4 bg-[#D8D0C4] rounded-full w-3/4" />
+                  <div className="h-4 bg-[#D8D0C4] rounded-full w-full" />
+                  <div className="h-4 bg-[#D8D0C4] rounded-full w-2/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            ref={ref}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            initial="hidden"
+            animate={inView ? 'visible' : 'hidden'}
+            variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
+          >
+            {articles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   )
