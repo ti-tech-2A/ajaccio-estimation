@@ -8,6 +8,8 @@ import { JsonLd } from '@/components/ui/JsonLd'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { MARKET_20000, MARKET_20090, MARKET_20167 } from '@/data/market-data'
+import { getMarketAggregates } from '@/lib/server/market-aggregates'
+import type { CoveredPostalCode } from '@/lib/constants'
 
 export const revalidate = 2592000
 
@@ -36,23 +38,46 @@ const datasetSchema = {
 
 const ALL_DATA = [MARKET_20000, MARKET_20090, MARKET_20167]
 
-const comparisonData = ALL_DATA.map((d) => ({
-  cp: d.postalCode,
-  Appartements: d.apptPriceMedian,
-  Villas: d.villaPriceMedian,
-}))
+function formatEvolution(pct: number): string {
+  if (pct === 0) return '—'
+  const sign = pct > 0 ? '+' : ''
+  return `${sign}${pct.toFixed(1).replace('.', ',')} %`
+}
 
 function EvolutionBadge({ value }: { value: string }) {
   const isUp = value.startsWith('+')
+  const isFlat = value === '—'
   return (
     <Badge variant={isUp ? 'up' : 'down'} size="sm">
-      {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+      {!isFlat && (isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />)}
       {value}
     </Badge>
   )
 }
 
-export default function MarchePage() {
+export default async function MarchePage() {
+  const liveAggregates = await Promise.all(
+    ALL_DATA.map((d) => getMarketAggregates(d.postalCode as CoveredPostalCode)),
+  )
+
+  const displayData = ALL_DATA.map((d, i) => {
+    const live = liveAggregates[i]
+    const useLive = live.hasLiveData
+    return {
+      ...d,
+      apptPriceMedian: useLive ? live.apartmentMedianSqm : d.apptPriceMedian,
+      villaPriceMedian: useLive ? live.villaMedianSqm : d.villaPriceMedian,
+      priceEvolution12m: useLive ? formatEvolution(live.evolution12mPct) : d.priceEvolution12m,
+      transactionCount12m: useLive ? live.totalCount12m : d.transactionCount12m,
+    }
+  })
+
+  const comparisonData = displayData.map((d) => ({
+    cp: d.postalCode,
+    Appartements: d.apptPriceMedian,
+    Villas: d.villaPriceMedian,
+  }))
+
   return (
     <main className="max-w-5xl mx-auto px-4 pt-32 pb-10">
       <JsonLd schema={datasetSchema} />
@@ -79,7 +104,7 @@ export default function MarchePage() {
           Données par code postal
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {ALL_DATA.map((d) => (
+          {displayData.map((d) => (
             <div
               key={d.postalCode}
               className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col"
