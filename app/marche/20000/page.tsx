@@ -23,7 +23,9 @@ import { SECTOR_20000 } from '@/data/sector-content/20000'
 import { DVF_LAST_UPDATE, DVF_LAST_UPDATE_LABEL, DVF_NEXT_UPDATE_LABEL } from '@/lib/constants'
 import { CalendarClock } from 'lucide-react'
 
-export const revalidate = 2592000
+// Cadence DVF officielle = mai + novembre (≈ 180 jours).
+// Trigger manuel via POST /api/admin/revalidate après update ESTIM CORSICA.
+export const revalidate = 15552000
 
 const SECTOR = SECTOR_20000
 const POSTAL_CODE = '20000'

@@ -22,7 +22,9 @@ import { getMarketPageData } from '@/lib/server/market-aggregates'
 import { SECTOR_20167 } from '@/data/sector-content/20167'
 import { DVF_LAST_UPDATE, DVF_LAST_UPDATE_LABEL } from '@/lib/constants'
 
-export const revalidate = 2592000
+// Cadence DVF officielle = mai + novembre (≈ 180 jours).
+// Trigger manuel via POST /api/admin/revalidate après update ESTIM CORSICA.
+export const revalidate = 15552000
 
 const SECTOR = SECTOR_20167
 const POSTAL_CODE = '20167'

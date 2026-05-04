@@ -7,6 +7,15 @@ function safeCompare(a: string, b: string): boolean {
   return timingSafeEqual(ha, hb)
 }
 
+const DATA_DEPENDENT_PATHS = [
+  '/',
+  '/ajaccio',
+  '/marche',
+  '/marche/20000',
+  '/marche/20090',
+  '/marche/20167',
+]
+
 export async function POST(req: Request) {
   const authHeader = req.headers.get('authorization')
   const secret = process.env.ADMIN_SECRET
@@ -15,8 +24,11 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const paths = ['/marche', '/marche/20000', '/marche/20090', '/marche/20167']
-  paths.forEach((p) => revalidatePath(p))
+  DATA_DEPENDENT_PATHS.forEach((p) => revalidatePath(p))
 
-  return Response.json({ revalidated: true, paths })
+  return Response.json({
+    revalidated: true,
+    paths: DATA_DEPENDENT_PATHS,
+    triggeredAt: new Date().toISOString(),
+  })
 }

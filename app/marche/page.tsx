@@ -11,7 +11,9 @@ import { MARKET_20000, MARKET_20090, MARKET_20167 } from '@/data/market-data'
 import { getMarketAggregates } from '@/lib/server/market-aggregates'
 import type { CoveredPostalCode } from '@/lib/constants'
 
-export const revalidate = 2592000
+// Cadence DVF officielle = mai + novembre (≈ 180 jours).
+// Trigger manuel via POST /api/admin/revalidate après update ESTIM CORSICA.
+export const revalidate = 15552000
 
 export const metadata: Metadata = {
   title: 'Marché immobilier Ajaccio — Prix DVF 20000, 20090, 20167',
