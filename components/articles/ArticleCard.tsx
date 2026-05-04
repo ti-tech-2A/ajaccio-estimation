@@ -77,13 +77,13 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         </h3>
 
         {color && article.category && (
-          <div className="mt-auto flex items-center gap-2">
+          <div className="mt-auto flex items-center gap-1.5">
             <span
-              className="rounded px-1.5 py-0.5 font-[family-name:var(--font-poppins)] font-bold"
+              className="rounded px-1 py-px font-[family-name:var(--font-poppins)] font-bold"
               style={{
                 backgroundColor: color.bg,
                 color: color.text,
-                fontSize: '9px',
+                fontSize: '7.5px',
                 letterSpacing: '0.06em',
               }}
             >
@@ -93,7 +93,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
               className="font-[family-name:var(--font-dm-sans)] font-medium"
               style={{
                 color: color.bg,
-                fontSize: '11px',
+                fontSize: '9.5px',
                 letterSpacing: '0.02em',
               }}
             >
