@@ -187,6 +187,9 @@ function trimQuartiles(sortedAsc: number[]): number[] {
   return sortedAsc.slice(trim, n - trim)
 }
 
+// Cap explicit (Supabase default = 1000) — un CP sur 5 ans n'excède jamais 50k.
+const MAX_ROWS = 49_999
+
 async function fetchPriceSqmBucket(
   client: SupabaseClient,
   cp: string,
@@ -201,7 +204,7 @@ async function fetchPriceSqmBucket(
     .gt(COL.price, 0)
     .gt(COL.surface, 0)
   q = withPostalFilter(q, cp)
-  const { data, error } = await q
+  const { data, error } = await q.range(0, MAX_ROWS)
   if (error || !data) return { raw: [], trimmed: [] }
   const sorted = toPriceSqmsFiltered(data as unknown as RawRow[])
   return { raw: sorted, trimmed: trimQuartiles(sorted) }
@@ -223,7 +226,7 @@ async function fetchPriceSqmRange(
     .gt(COL.price, 0)
     .gt(COL.surface, 0)
   q = withPostalFilter(q, cp)
-  const { data } = await q
+  const { data } = await q.range(0, MAX_ROWS)
   if (!data) return []
   return toPriceSqmsFiltered(data as unknown as RawRow[])
 }
@@ -385,7 +388,10 @@ export async function getMarketTypology(
       .gt(COL.surface, 0)
     qHouse = withPostalFilter(qHouse, cp)
 
-    const [apartmentsRes, housesRes] = await Promise.all([qApt, qHouse])
+    const [apartmentsRes, housesRes] = await Promise.all([
+      qApt.range(0, MAX_ROWS),
+      qHouse.range(0, MAX_ROWS),
+    ])
 
     const apartments = (apartmentsRes.data ?? []) as unknown as RawTypoRow[]
     const houses = (housesRes.data ?? []) as unknown as RawTypoRow[]
@@ -460,7 +466,7 @@ export async function getMonthlySeries(
       .gt(COL.price, 0)
       .gt(COL.surface, 0)
     q = withPostalFilter(q, cp)
-    const { data } = await q
+    const { data } = await q.range(0, MAX_ROWS)
     if (!data) return empty
 
     const byMonth = new Map<string, number[]>()
@@ -527,7 +533,7 @@ export async function getYearlySeries(
       .gt(COL.price, 0)
       .gt(COL.surface, 0)
     q = withPostalFilter(q, cp)
-    const { data } = await q
+    const { data } = await q.range(0, MAX_ROWS)
     if (!data) return empty
 
     const byYear = new Map<number, number[]>()
